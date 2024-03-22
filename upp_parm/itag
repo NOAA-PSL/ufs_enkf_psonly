@@ -1,0 +1,12 @@
+&model_inputs
+fileName='ATMFILENAME'
+IOFORM='netcdfpara'
+grib='grib2'
+DateStr='YYYY-MM-DD_HH:00:00'
+MODELNAME='GFS'
+fileNameFlux='SFCFILENAME'
+fileNameFlat='postxconfig-NT.txt'
+/
+&nampgb
+numx=1
+/
