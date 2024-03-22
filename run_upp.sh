@@ -22,7 +22,7 @@ export scriptsdir="${basedir}/scripts/${exptname}"
 export execdir=${scriptsdir}/exec_${machine}
 
 analdate='2020010106'
-while [ $analdate -le '202010112' ]; do
+while [ $analdate -le '2020010112' ]; do
 datapath=${basedir}/${exptname}
 YYYYMMDD=`echo $analdate | cut -c1-8`
 YYYY=`echo $analdate | cut -c1-4`
@@ -47,5 +47,5 @@ srun -n 4 ${execdir}/upp.x < itag
 wgrib2 GFSPRS.GrbF00 -new_grid ncep grid 3 GFSPRS_1deg.GrbF00
 /bin/mv -f GFSPRS_1deg.GrbF00 ${datapath}/${analdate}
 /bin/rm -rf ${datapath}/postprd$$
-analdate=`${scriptsdir}/incddate.sh $analdate 6`
+analdate=`${scriptsdir}/incdate.sh $analdate 6`
 done

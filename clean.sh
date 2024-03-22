@@ -19,7 +19,7 @@ cd $datapath2
 /bin/rm -rf fgens fgens2
 mkdir fgens
 mkdir fgens2
-/bin/rm -f mem*/*nc mem*/*txt mem*/*grb mem*/*dat mem*/co2*
+/bin/rm -f mem*/*nc mem*/*txt mem*/*grb mem*/*dat mem*/co2* diag*mem*
 /bin/rm -f ${charnanal}/*nc ${charnanal}/*txt ${charnanal}/*grb ${charnanal}/*dat ${charnanal}/co2*
 /bin/mv -f mem* fgens
 /bin/mv -f sfg*mem* fgens2

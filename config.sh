@@ -20,6 +20,7 @@ export cleanup_fg='true'
 export cleanup_anal='true'
 export cleanup_observer='true' 
 export resubmit='true'
+export save_hpss_subset="false" # save a subset of data each analysis time to HPSS
 export save_hpss="false"
 # override values from above for debugging.
 #export cleanup_ensmean='false'
@@ -28,6 +29,7 @@ export save_hpss="false"
 #export cleanup_fg='false'
 #export resubmit='false'
 #export do_cleanup='false'
+#export save_hpss_subset="false" # save data each analysis time to HPSS
 #export save_hpss="false" # save data each analysis time to HPSS
 
 source $MODULESHOME/init/sh
@@ -236,7 +238,7 @@ export enkfstatefhrs=`python -c "from __future__ import print_function; print(li
 export iaufhrs="6"
 export iau_delthrs=-1
 
-export nitermax=1 # number of retries
+export nitermax=2 # number of retries
 export scriptsdir="${basedir}/scripts/${exptname}"
 export homedir=$scriptsdir
 export incdate="${scriptsdir}/incdate.sh"
