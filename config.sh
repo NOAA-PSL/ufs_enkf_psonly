@@ -230,7 +230,7 @@ export RESTART_FREQ=3
 FHMAXP1=`expr $FHMAX + 1`
 export FHMAX_LONGER=`expr $FHMAX + $ANALINC`
 export enkfstatefhrs=`python -c "from __future__ import print_function; print(list(range(${FHMIN},${FHMAXP1},${FHOUT})))" | cut -f2 -d"[" | cut -f1 -d"]"`
-#export iaufhrs="6"
+#export iaufhrs=3,6,9
 #export iau_delthrs="6" # iau_delthrs < 0 turns IAU off
 # IAU off
 export iaufhrs="6"
@@ -248,14 +248,13 @@ export SMOOTHINF=35 # inflation smoothing (spectral truncation)
 export covinflatemax=1.e2
 export reducedgrid=.false. # if T, used reduced gaussian analysis grid in EnKF
 export covinflatemin=1.0                                            
-export analpertwtnh=0.85
-export analpertwtsh=0.85
-export analpertwttr=0.85
+export analpertwtnh=0.9
+export analpertwtsh=0.9
+export analpertwttr=0.9
 export analpertwtnh_rtpp=0.0
 export analpertwtsh_rtpp=0.0
 export analpertwttr_rtpp=0.0
 export pseudo_rh=.true.
-export write_ensmean=.false. # write out ens mean analysis in EnKF
 if [[ $write_ensmean == ".true." ]]; then
    export ENKFVARS="write_ensmean=${write_ensmean},"
 fi
