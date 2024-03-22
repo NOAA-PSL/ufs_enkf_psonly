@@ -6,9 +6,9 @@
 #SBATCH -N 20  
 #SBATCH --ntasks-per-node=80
 #SBATCH -p hercules
-#SBATCH -J C96_enkf_psonly
-#SBATCH -e C96_enkf_psonly.err
-#SBATCH -o C96_enkf_psonly.out
+#SBATCH -J ufs_enkf_psonly
+#SBATCH -e ufs_enkf_psonly.err
+#SBATCH -o ufs_enkf_psonly.out
 
 export NODES=$SLURM_NNODES
 export corespernode=$SLURM_CPUS_ON_NODE

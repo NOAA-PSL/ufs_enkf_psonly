@@ -4,11 +4,12 @@ echo "running on $machine using $NODES nodes and $cores CORES"
 
 export ndates_job=1 # number of DA cycles to run in one job submission
 # resolution of control and ensmemble.
-export RES=96   
-export OCNRES="mx100"
+export RES=192  
+export LEVS=127  
+export OCNRES="mx025"
 export ORES3=`echo $OCNRES | cut -c3-5`
 
-export exptname="C${RES}ufs_psonly1"
+export exptname="C${RES}L${LEVS}ufs_psonly1"
 
 export fg_gfs="run_ens_fv3.sh"
 export rungfs="run_fv3.sh"
@@ -176,10 +177,9 @@ export NST_GSI=0          # default 0: No NST info at all;
 
 if [ $NST_GSI -gt 0 ]; then export NSTINFO=4; fi
 
-export LEVS=64   
 #export SUITE="FV3_GFS_v17_p8"
-#export SUITE="FV3_GFS_v16"
-export SUITE="FV3_GFS_v15p2"
+export SUITE="FV3_GFS_v16"
+#export SUITE="FV3_GFS_v15p2"
 
 # stochastic physics parameters.
 export DO_SPPT=T
@@ -227,16 +227,16 @@ export FHMIN=3
 export FHMAX=9
 export FHOUT=3
 export FHCYC=6
-export FRAC_GRID=.true.
+export FRAC_GRID=.false.
 export RESTART_FREQ=3
 FHMAXP1=`expr $FHMAX + 1`
 export FHMAX_LONGER=`expr $FHMAX + $ANALINC`
 export enkfstatefhrs=`python -c "from __future__ import print_function; print(list(range(${FHMIN},${FHMAXP1},${FHOUT})))" | cut -f2 -d"[" | cut -f1 -d"]"`
-#export iaufhrs=3,6,9
-#export iau_delthrs="6" # iau_delthrs < 0 turns IAU off
+export iaufhrs=3,6,9
+export iau_delthrs="6" # iau_delthrs < 0 turns IAU off
 # IAU off
-export iaufhrs="6"
-export iau_delthrs=-1
+#export iaufhrs="6"
+#export iau_delthrs=-1
 
 export nitermax=2 # number of retries
 export scriptsdir="${basedir}/scripts/${exptname}"
@@ -286,6 +286,8 @@ export paoverpb_thresh=0.998  # ignored for LETKF, set to 1 to use all obs in se
 export saterrfact=1.0
 export deterministic=.true.
 export sortinc=.true.
+
+export taperanalperts=".false."
 
 # serial filter parameters
 # (from https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.3598)

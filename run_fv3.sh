@@ -475,18 +475,20 @@ else
    echo "done running model.. `date`"
 fi
 
-ls -l
 export DATOUT=${DATOUT:-$datapathp1}
 # this is a hack to work around the fact that first time step history
 # file is not written if restart file requested at first time step.
 if [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ]; then
+   fh=3
+   fh2=$[$fh+$FHOUT]
+   charfhr2="f"`printf %03i $fh2`
    if [ ! -s  dynf003.nc ]; then
-     echo "dynf003.nc missing, copy dynf004"
-     /bin/cp -f dynf004.nc dynf003.nc
+     echo "dynf003.nc missing, copy dyn${charfhr2}"
+     /bin/cp -f dyn${charfhr2}.nc dynf003.nc
    fi
    if [ ! -s  phyf003.nc ]; then
-     echo "phyf003.nc missing, copy phyf004"
-     /bin/cp -f phyf004.nc phyf003.nc
+     echo "phyf003.nc missing, copy phy${charfhr2}"
+     /bin/cp -f phy${charfhr2}.nc phyf003.nc
    fi
 fi
 # rename netcdf history files.
