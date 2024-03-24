@@ -28,10 +28,9 @@ for date in dates:
     nc.close()
 print(spread.min(), spread.max())
 if var in ['ugrd','vgrd']:
-   clevs = np.arange(0,4.1,0.2)
-   #clevs = np.arange(-0.5,0.51,0.05)
+   clevs = np.arange(0,9.05,0.45)
 elif var == 'tmp':
-   clevs = np.arange(0.,2.05,0.1)
+   clevs = np.arange(0.,4.55,0.225)
 lats, levs = np.meshgrid(lats, levs)
 plt.contourf(lats, levs, spread, clevs, cmap=plt.cm.hot_r, extend='both')
 plt.colorbar()
