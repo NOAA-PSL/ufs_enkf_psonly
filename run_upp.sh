@@ -16,7 +16,7 @@ module load ${machine}
 module load wgrib2
 module list
 
-export exptname=C96ufs_psonly1
+export exptname=C192L127_psonly1
 export basedir=/work2/noaa/gsienkf/${USER}
 export scriptsdir="${basedir}/scripts/${exptname}"
 export execdir=${scriptsdir}/exec_${machine}

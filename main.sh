@@ -173,8 +173,12 @@ if [ $cold_start == 'false' ]; then
 # only save full ensemble data to hpss if checkdate.py returns 0
 # a subset will be saved if save_hpss_subset="true" and save_hpss="true"
 date_check=`python ${homedir}/checkdate.py ${analdate}`
+if [ $save_hpss == 'true' ]; then
 if [ $date_check -eq 0 ]; then
   export save_hpss_full="true"
+else
+  export save_hpss_full="false"
+fi
 else
   export save_hpss_full="false"
 fi

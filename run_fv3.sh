@@ -393,7 +393,7 @@ use_hyper_thread:        F
 ncores_per_node:         ${corespernode}
 restart_interval:        ${restart_interval}
 quilting:                T
-quilting_restart:        F
+quilting_restart:        T
 output_history:          T
 write_groups:            ${write_groups}
 write_tasks_per_group:   ${write_tasks}
