@@ -267,8 +267,9 @@ export getkf=.true.
 export getkf_inflation=.false.
 export modelspace_vloc=.true.
 export letkf_novlocal=.true.
+export ANAVINFO_ENKF=${scriptsdir}/global_anavinfo.l${LEVS}.txt.dpres
 
-export nobsl_max=1000
+export nobsl_max=4000
 export corrlengthnh=2000
 export corrlengthtr=2000
 export corrlengthsh=2000
@@ -287,7 +288,7 @@ export saterrfact=1.0
 export deterministic=.true.
 export sortinc=.true.
 
-export taperanalperts=".false."
+export taperanalperts=".true."
 
 # serial filter parameters
 # (from https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.3598)
@@ -309,7 +310,7 @@ export corrlengthsh=4000
 export lnsigcutoffpsnh=4
 export lnsigcutoffpstr=4
 export lnsigcutoffpssh=4
-# also turn on Huber norm (nonlinear QC)?
+export ANAVINFO_ENKF=${scriptsdir}/global_anavinfo.l${LEVS}.txt.ps
 
 export sprd_tol=3.2
 
@@ -369,8 +370,6 @@ export enkfbin=${execdir}/enkf.x
 
 
 # model space localization
-#export ANAVINFO_ENKF=${scriptsdir}/global_anavinfo.l${LEVS}.txt.dpres
-export ANAVINFO_ENKF=${scriptsdir}/global_anavinfo.l${LEVS}.txt.ps
 export CONVINFO=${scriptsdir}/global_convinfo.txt.psonly
 
 cd $scriptsdir
