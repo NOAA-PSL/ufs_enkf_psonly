@@ -46,7 +46,9 @@ if [ $save_hpss_subset == "false" ] && [ $save_hpss_full == "false" ]; then
   /bin/rm -rf ensmean
   # save backup of next analysis time once per day
   # so analysis can be restarted
+  cd ..
   hr=`echo $analdatep1 | cut -c9-10`
+  echo "tar up restarts"
   if [ $hr == '00' ]; then
      tar -cvf ${analdatep1}_restart.tar ${analdatep1}
   fi
