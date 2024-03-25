@@ -193,6 +193,8 @@ if [ "$cold_start" == "false" ] && [ -z $skip_calc_increment ]; then
 /
 EOF
       cat calc_increment_ncio.nml
+      #export DONT_USE_DPRES=1
+      #export DONT_USE_DELZ=1
       echo "create ${increment_file}"
       /bin/rm -f ${increment_file}
       export "PGM=${execdir}/calc_increment_ncio.x ${fgfile} ${analfile} ${increment_file}"

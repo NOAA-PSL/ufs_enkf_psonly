@@ -172,15 +172,11 @@ if [ $cold_start == 'false' ]; then
 # cleanup
 # only save full ensemble data to hpss if checkdate.py returns 0
 # a subset will be saved if save_hpss_subset="true" and save_hpss="true"
-if [ $save_hpss == 'true' ]; then
-   date_check=`python ${homedir}/checkdate.py ${analdate}`
-   if [ $date_check -eq 0 ]; then
-      export save_hpss_full="true"
-   else
-      export save_hpss_full="false"
-   fi
+date_check=`python ${homedir}/checkdate.py ${analdate}`
+if [ $date_check -eq 0 ]; then
+   export save_hpss_full="true"
 else
-  export save_hpss_full="false"
+   export save_hpss_full="false"
 fi
 if [ $do_cleanup == 'true' ]; then
    sh ${scriptsdir}/clean.sh > ${current_logdir}/clean.out 2>&1

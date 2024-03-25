@@ -16,13 +16,13 @@ module load ${machine}
 module load wgrib2
 module list
 
-export exptname=C192L127ufs_psonly1
+export exptname=C192L127ufs_psonly2
 export basedir=/work2/noaa/gsienkf/${USER}
 export scriptsdir="${basedir}/scripts/${exptname}"
 export execdir=${scriptsdir}/exec_${machine}
 
 analdate='2021090500'
-while [ $analdate -le '2021090600' ]; do
+while [ $analdate -le '2021090812' ]; do
 datapath=${basedir}/${exptname}
 YYYYMMDD=`echo $analdate | cut -c1-8`
 YYYY=`echo $analdate | cut -c1-4`

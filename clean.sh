@@ -24,13 +24,12 @@ mkdir fgens2
 /bin/mv -f mem* fgens
 /bin/mv -f sfg*mem* fgens2
 /bin/mv -f bfg*mem* fgens2
-/bin/cp -f sfg*ensmean fgens2
 
 #mkdir analens
 #/bin/mv -f sanl_*mem* analens # save analysis ensemble
 #echo "files moved to analens `date`"
 /bin/rm -f sanl_*mem* # don't save analysis ensemble
-/bin/rm -f fgens2/*fhr00* fgens2/*orig
+
 echo "files moved to fgens, fgens2 `date`"
 
 /bin/rm -f hostfile*
@@ -40,18 +39,10 @@ echo "files moved to fgens, fgens2 `date`"
 /bin/rm -f ozinfo convinfo satinfo scaninfo anavinfo
 /bin/rm -rf *tmp* nodefile* machinefile*
 /bin/rm -rf hybridtmp*
-if [ $save_hpss_subset == "false" ] && [ $save_hpss_full == "false" ]; then
+if [ $save_hpss == "false" ] && [ $save_hpss_full == "true" ]; then
+  echo "keeping fgens,fgens2"
+else
   /bin/rm -rf fgens fgens2
-  /bin/rm -f *fhr03* *fhr04* *fhr05* *fhr07* *fhr08* *fhr09* 
-  /bin/rm -rf ensmean
-  # save backup of next analysis time once per day
-  # so analysis can be restarted
-  cd ..
-  hr=`echo $analdatep1 | cut -c9-10`
-  echo "tar up restarts"
-  if [ $hr == '00' ]; then
-     tar -cvf ${analdatep1}_restart.tar ${analdatep1}
-  fi
 fi
 echo "unwanted files removed `date`"
 wait

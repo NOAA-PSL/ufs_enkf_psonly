@@ -10,9 +10,9 @@ def getmean(diff,coslats):
     meancoslats = coslats.mean()
     return (coslats*diff).mean()/meancoslats
 
-date1 = sys.argv[1]
-date2 = sys.argv[2]
-exptname = sys.argv[3]
+exptname = sys.argv[1]
+date1 = sys.argv[2]
+date2 = sys.argv[3]
 datapath = '../../../'+exptname
 
 era5_ds = Dataset('era5_1deg.nc')
