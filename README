@@ -1,5 +1,8 @@
 git clone https://github.com/NOAA-PSL/ufs_enkf_psonly
 
+workflow to assimilate surface pressure observations into the UFS
+using the EnKF.
+
 config.sh is main script, hpss.sh is script to archive on hpss
 ${machine}_preamble is job scheduler preamble for config.sh
 ${machine}_preamble_hpss is job scheduler preamble for hpss.sh
@@ -25,7 +28,6 @@ total 344848
 -rwxr-x--- 1 jwhitake gsienkf   1766800 Mar 22 11:07 calc_increment_ncio.x
 -rwxr-x--- 1 jwhitake gsienkf  47542768 Mar 24 10:44 enkf.x
 -rwxr-x--- 1 jwhitake gsienkf 134247688 Mar 22 11:07 fv3_intel.exe
--rwxr-x--- 1 jwhitake gsienkf 128521088 Mar 22 11:07 fv3_intel.exe.save
 -rwxr-x--- 1 jwhitake gsienkf   5062872 Mar 22 11:07 getsfcensmeanp.x
 -rwxr-x--- 1 jwhitake gsienkf   4340824 Mar 22 11:07 getsigensmeanp_smooth.x
 -rwxr-x--- 1 jwhitake gsienkf   2169048 Mar 22 11:07 psop_ncio_ensmean.x
