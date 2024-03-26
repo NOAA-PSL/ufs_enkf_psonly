@@ -1,0 +1,41 @@
+git clone https://github.com/NOAA-PSL/ufs_enkf_psonly
+
+config.sh is main script, hpss.sh is script to archive on hpss
+${machine}_preamble is job scheduler preamble for config.sh
+${machine}_preamble_hpss is job scheduler preamble for hpss.sh
+submit_job.sh <machine> submits config.sh (which then submits itself and hpss.sh).
+most model namelist parameters set in the suite specific namelist file (FV3*nml).
+most of EnKF namelist parameters set in enkf_run.sh, some in config.sh.
+Processor layout stuff for FV3 and EnKF is set in <machine>_preamble_
+
+Currently set up to use GFSv16 physics configuration using latest ufs-weather-model
+develop (as of 20240324).
+
+To cold start, create an initial directory in the experiment directory (i.e <expthome>/YYYYMMDDHH).  Cold start files for 2021082921 are available on orion/hercules.
+
+Create analdate.sh and fg_only.sh in the top level experiment directory (<expthome>).
+fg_only should contain "export fg_only=true" plus "export cold_start=true".
+
+"export analdate=YYYYMMDDHH1" and "export analdate_end=YYYYMMDDHH2", where YYYYMMDDHH1,2 is the
+date you want the experiment to start and end.
+
+executables need to be in exec_<machine>.  For example, 
+(base) [jwhitake@hercules-login-2 C192L127ufs_psonly1]$ ls -l exec_hercules/
+total 344848
+-rwxr-x--- 1 jwhitake gsienkf   1766800 Mar 22 11:07 calc_increment_ncio.x
+-rwxr-x--- 1 jwhitake gsienkf  47542768 Mar 24 10:44 enkf.x
+-rwxr-x--- 1 jwhitake gsienkf 134247688 Mar 22 11:07 fv3_intel.exe
+-rwxr-x--- 1 jwhitake gsienkf 128521088 Mar 22 11:07 fv3_intel.exe.save
+-rwxr-x--- 1 jwhitake gsienkf   5062872 Mar 22 11:07 getsfcensmeanp.x
+-rwxr-x--- 1 jwhitake gsienkf   4340824 Mar 22 11:07 getsigensmeanp_smooth.x
+-rwxr-x--- 1 jwhitake gsienkf   2169048 Mar 22 11:07 psop_ncio_ensmean.x
+-rwxr-x--- 1 jwhitake gsienkf   2175784 Mar 22 11:07 psop_ncio.x
+-rwxr-x--- 1 jwhitake gsienkf  27264712 Mar 22 11:07 upp.x`
+
+enkf.x is from github.com/jswhit/GSI (branch feature/obs_selection).
+calc_increment_ncio.x is from github.com/jswhit/GSI-utils (branch calc_inc_fix).
+fv3_intel.exe is from latest develop github.com/ufs-community/ufs-weather-model.
+
+to turn off IAU, set iaudelthrs=-1 and iaufhrs=6 in config.sh
+
+Currently only hercules is supported, but I can easily add other RDHPCS platforms.
