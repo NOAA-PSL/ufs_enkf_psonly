@@ -16,9 +16,9 @@ iy,im,id,ih = dateutils.splitdate(date2)
 end_time = datetime(iy,im,id,ih)
 era5_ds = full_era5_ds.sel(time=slice('2021-09-01 00:00:00','2021-12-31 18:00:00'))
 era5_ds = era5_ds.thin(time=6) # thin to every 6 hours
-era5_ds = era5_ds.isel(level=21) # level 21 is 500 hpa
+era5_ds = era5_ds.sel(level=500) # level 21 is 500 hpa
 if not (era5_ds['latitude'].diff('latitude') > 0).all():
-  # Ensure ascending latitude, 500 hpa only.
+  # Ensure ascending latitude
   era5_ds = era5_ds.isel(latitude=slice(None, None, -1))
 new_lat = np.arange(-90,90.1,1.0)
 new_lon = np.arange(0,360,1.0)
