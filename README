@@ -32,10 +32,15 @@ total 344848
 -rwxr-x--- 1 jwhitake gsienkf   4340824 Mar 22 11:07 getsigensmeanp_smooth.x
 -rwxr-x--- 1 jwhitake gsienkf   2169048 Mar 22 11:07 psop_ncio_ensmean.x
 -rwxr-x--- 1 jwhitake gsienkf   2175784 Mar 22 11:07 psop_ncio.x
--rwxr-x--- 1 jwhitake gsienkf  27264712 Mar 22 11:07 upp.x`
+-rwxr-x--- 1 jwhitake gsienkf  27264712 Mar 22 11:07 upp.x
 
 enkf.x is from github.com/jswhit/GSI (branch feature/obs_selection).
-calc_increment_ncio.x is from github.com/jswhit/GSI-utils (branch calc_inc_fix).
+
+calc_increment_ncio.x, getsfcensmeanp.x, getsigensmeanp_smooth.x, psop_ncio*.x are from 
+github.com/jswhit/GSI-utils (branch calc_inc_fix).
+
+upp.x is from github.com/ufs-community/UFS_UTILS
+
 fv3_intel.exe is from latest develop github.com/ufs-community/ufs-weather-model.
 
 to turn off IAU, set iaudelthrs=-1 and iaufhrs=6 in config.sh
