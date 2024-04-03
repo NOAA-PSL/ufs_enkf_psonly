@@ -9,7 +9,7 @@ export LEVS=127
 export OCNRES="mx025"
 export ORES3=`echo $OCNRES | cut -c3-5`
 
-export exptname="C${RES}L${LEVS}ufs_psonly1"
+export exptname="C${RES}L${LEVS}ufs_psonly2"
 
 export fg_gfs="run_ens_fv3.sh"
 export rungfs="run_fv3.sh"
@@ -204,7 +204,7 @@ elif [ $RES -eq 384 ]; then
    export LONB=1536
    export LATB=768
 elif [ $RES -eq 192 ]; then
-   export dt_atmos=450
+   export dt_atmos=360
    export cdmbgwd="0.23,1.5,1.0,1.0"
    export JCAP=382
    export LONB=768  

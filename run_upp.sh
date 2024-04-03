@@ -21,8 +21,8 @@ export basedir=/work2/noaa/gsienkf/${USER}
 export scriptsdir="${basedir}/scripts/${exptname}"
 export execdir=${scriptsdir}/exec_${machine}
 
-analdate='2021090500'
-while [ $analdate -le '2021090812' ]; do
+analdate='2021091900'
+while [ $analdate -le '2021092712' ]; do
 datapath=${basedir}/${exptname}
 YYYYMMDD=`echo $analdate | cut -c1-8`
 YYYY=`echo $analdate | cut -c1-4`

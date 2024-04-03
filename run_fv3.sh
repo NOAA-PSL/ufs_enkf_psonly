@@ -185,8 +185,8 @@ if [ "$cold_start" == "false" ] && [ -z $skip_calc_increment ]; then
 &setup
    no_mpinc=.true.
    no_delzinc=.false.
-   taper_strat=.false.
-   taper_strat_ozone=.false.
+   taper_strat=.true.
+   taper_strat_ozone=.true.
    taper_pbl=.false.
    ak_bot=10000.,
    ak_top=5000.

@@ -83,8 +83,8 @@ control_vector_enkf::
 !pst       1      0       1.20        -1.0     state    prse,u,v
  tv      127      0       1.50        -1.0     state    tv
  q       127      1       1.50        -1.0     state    q
- oz      127      1       2.00        -1.0     state    oz
  dprs    127      0       1.00        -1.0     state    prse
+!oz      127      1       2.00        -1.0     state    oz
 !sst       1      0       1.00        -1.0     state    sst
 !cw      127      1       1.00        -1.0     state    cw
 !stl       1      0       3.00        -1.0     motley   sst
