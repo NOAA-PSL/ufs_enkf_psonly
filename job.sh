@@ -1,24 +1,24 @@
 #!/bin/sh
-#SBATCH -q urgent
-#SBATCH -t 00:30:00
-##SBATCH -A gsienkf
-#SBATCH -A da-cpu  
-#SBATCH -N 20  
-#SBATCH --ntasks-per-node=80
-#SBATCH -p hercules
-#SBATCH -J C96_enkf_psonly
-#SBATCH -e C96_enkf_psonly.err
-#SBATCH -o C96_enkf_psonly.out
+##SBATCH -q urgent
+#SBATCH -t 02:30:00
+#SBATCH -A gsienkf
+#SBATCH -N 80  
+#SBATCH --ntasks-per-node=40
+#SBATCH -p orion
+#SBATCH -J ufs_enkf_psonly
+#SBATCH -e ufs_enkf_psonly.out
+#SBATCH -o ufs_enkf_psonly.out        
 
 export NODES=$SLURM_NNODES
 export corespernode=$SLURM_CPUS_ON_NODE
-export machine='hercules'
+export machine='orion'
 
-export fg_proc=$corespernode
+export fg_proc=`expr 2 \* $corespernode`
 export fg_threads=1 
-export enkf_threads=16
-export write_groups=8
-export write_tasks=1 
+export enkf_threads=10
+export gsi_control_threads=10
+export write_groups=1
+export write_tasks=8 
 export layout="3, 4"
 # hybrid gain GSI(3DVar)/EnKF workflow
 export cores=`expr $NODES \* $corespernode`
@@ -27,10 +27,11 @@ echo "running on $machine using $NODES nodes and $cores CORES"
 export ndates_job=1 # number of DA cycles to run in one job submission
 # resolution of control and ensmemble.
 export RES=96   
+export LEVS=127  
 export OCNRES="mx100"
 export ORES3=`echo $OCNRES | cut -c3-5`
 
-export exptname="C${RES}ufs_psonly1"
+export exptname="C${RES}L${LEVS}ufs_psonlyiau_gfsv16"
 
 export fg_gfs="run_ens_fv3.sh"
 export rungfs="run_fv3.sh"
@@ -42,6 +43,7 @@ export cleanup_fg='true'
 export cleanup_anal='true'
 export cleanup_observer='true' 
 export resubmit='true'
+export save_hpss_subset="false" # save a subset of data each analysis time to HPSS
 export save_hpss="false"
 # override values from above for debugging.
 #export cleanup_ensmean='false'
@@ -50,6 +52,7 @@ export save_hpss="false"
 #export cleanup_fg='false'
 #export resubmit='false'
 #export do_cleanup='false'
+#export save_hpss_subset="false" # save data each analysis time to HPSS
 #export save_hpss="false" # save data each analysis time to HPSS
 
 source $MODULESHOME/init/sh
@@ -74,38 +77,33 @@ if [ "$machine" == 'hera' ]; then
    module load hdf5_parallel/1.10.6
    #module load netcdf_parallel/4.7.4
 elif [ "$machine" == 'orion' ]; then
-   export basedir=/work/noaa/gsienkf/${USER}
+   source $MODULESHOME/init/sh
+   export basedir=/work2/noaa/gsienkf/${USER}
    export datadir=$basedir
    export datapath="${datadir}/${exptname}"
    export logdir="${datadir}/logs/${exptname}"
    export hsidir="/ESRL/BMC/gsienkf/2year/whitaker/${exptname}"
    export obs_datapath=/work2/noaa/gsienkf/whitaker/psobs
    export sstice_datapath=/work2/noaa/gsienkf/whitaker/era5sstice
+   export sstice_datapath=/work/noaa/rstprod/dump
    ulimit -s unlimited
-   source $MODULESHOME/init/sh
-
-   module purge
-   #module load intel/2018.4
-   #module load impi/2018.4
-   #module load mkl/2018.4
-   #export NCEPLIBS=/apps/contrib/NCEPLIBS/lib
-   #module use -a $NCEPLIBS/modulefiles
-   #module unload netcdf 
-   #module unload hdf5
-   #module load netcdfp/4.7.4
-
-
-   module use /apps/contrib/NCEP/libs/hpc-stack/modulefiles/stack
-   module load hpc/1.1.0
-   module load hpc-intel/2018.4
-   module unload mkl/2020.2
-   module load mkl/2018.4
-   module load hpc-impi/2018.4
-
-   module load python/3.7.5
-   export PYTHONPATH=/home/jwhitake/.local/lib/python3.7/site-packages
-   export HDF5_DISABLE_VERSION_CHECK=1
+   module use /work/noaa/epic/role-epic/spack-stack/orion/spack-stack-1.6.0/envs/gsi-addon-env-rocky9/install/modulefiles/Core 
+   module load stack-intel/2021.9.0
+   module load crtm-fix/2.4.0.1_emc
+   module load stack-intel-oneapi-mpi/2021.9.0
+   module load intel-oneapi-mkl/2022.2.1
+   module load grib-util
+   module load parallelio
+   module load netcdf/4.9.2
+   module load netcdf-fortran/4.6.1
+   module load bufr/11.7.0 ## worked jan 5
+   module load crtm/2.4.0
+   module load gsi-ncdiag
+   module load python
+   module load py-netcdf4
    module list
+   export HDF5_DISABLE_VERSION_CHECK=1
+   export WGRIB=`which wgrib`
 elif [ $machine == "hercules" ]; then
    source $MODULESHOME/init/sh
    export basedir=/work2/noaa/gsienkf/${USER}
@@ -116,7 +114,6 @@ elif [ $machine == "hercules" ]; then
    export obs_datapath=/work2/noaa/gsienkf/whitaker/psobs
    export sstice_datapath=/work2/noaa/gsienkf/whitaker/era5sstice
    ulimit -s unlimited
-   source $MODULESHOME/init/sh
    module use /work/noaa/epic/role-epic/spack-stack/hercules/spack-stack-1.6.0/envs/gsi-addon-env/install/modulefiles/Core 
    module load stack-intel/2021.9.0
    module load crtm-fix/2.4.0.1_emc
@@ -132,7 +129,6 @@ elif [ $machine == "hercules" ]; then
    module load python
    module load py-netcdf4
    module list
-   #export PATH="/work/noaa/gsienkf/whitaker/miniconda3/bin:$PATH"
    export HDF5_DISABLE_VERSION_CHECK=1
    export WGRIB=`which wgrib`
 elif [ "$machine" == 'gaea' ]; then
@@ -194,18 +190,22 @@ export NST_GSI=0          # default 0: No NST info at all;
                           #         2: Input NST info, used in CRTM simulation, no Tr analysis
                           #         3: Input NST info, used in both CRTM simulation and Tr analysis
 
+# turn off NST
+#export DONST="NO"
+#export NST_MODEL=0
+#export NST_GSI=0
+
 if [ $NST_GSI -gt 0 ]; then export NSTINFO=4; fi
 
-export LEVS=64   
 #export SUITE="FV3_GFS_v17_p8"
-#export SUITE="FV3_GFS_v16"
-export SUITE="FV3_GFS_v15p2"
+export SUITE="FV3_GFS_v16"
+#export SUITE="FV3_GFS_v15p2"
 
 # stochastic physics parameters.
 export DO_SPPT=T
 export SPPT=0.5
-export DO_SHUM=T
-export SHUM=0.005
+export DO_SHUM=F
+export SHUM=0.0
 export DO_SKEB=T
 export SKEB=0.3
 export PERT_MP=.false.
@@ -230,9 +230,9 @@ elif [ $RES -eq 192 ]; then
    export LONB=768  
    export LATB=384
 elif [ $RES -eq 96 ]; then
-   export dt_atmos=720
+   export dt_atmos=300
    export cdmbgwd="0.14,1.8,1.0,1.0"  # mountain blocking, ogwd, cgwd, cgwd src scaling
-   export JCAP=188
+   export JCAP=190
    export LONB=384  
    export LATB=192
 else
@@ -252,13 +252,13 @@ export RESTART_FREQ=3
 FHMAXP1=`expr $FHMAX + 1`
 export FHMAX_LONGER=`expr $FHMAX + $ANALINC`
 export enkfstatefhrs=`python -c "from __future__ import print_function; print(list(range(${FHMIN},${FHMAXP1},${FHOUT})))" | cut -f2 -d"[" | cut -f1 -d"]"`
-#export iaufhrs="6"
-#export iau_delthrs="6" # iau_delthrs < 0 turns IAU off
+export iaufhrs=3,6,9
+export iau_delthrs="6" # iau_delthrs < 0 turns IAU off
 # IAU off
-export iaufhrs="6"
-export iau_delthrs=-1
+#export iaufhrs="6"
+#export iau_delthrs=-1
 
-export nitermax=1 # number of retries
+export nitermax=2 # number of retries
 export scriptsdir="${basedir}/scripts/${exptname}"
 export homedir=$scriptsdir
 export incdate="${scriptsdir}/incdate.sh"
@@ -270,14 +270,13 @@ export SMOOTHINF=35 # inflation smoothing (spectral truncation)
 export covinflatemax=1.e2
 export reducedgrid=.false. # if T, used reduced gaussian analysis grid in EnKF
 export covinflatemin=1.0                                            
-export analpertwtnh=0.85
-export analpertwtsh=0.85
-export analpertwttr=0.85
+export analpertwtnh=0.9
+export analpertwtsh=0.9
+export analpertwttr=0.9
 export analpertwtnh_rtpp=0.0
 export analpertwtsh_rtpp=0.0
 export analpertwttr_rtpp=0.0
-export pseudo_rh=.true.
-export write_ensmean=.false. # write out ens mean analysis in EnKF
+export pseudo_rh=.false.
 if [[ $write_ensmean == ".true." ]]; then
    export ENKFVARS="write_ensmean=${write_ensmean},"
 fi
@@ -288,8 +287,9 @@ export getkf=.true.
 export getkf_inflation=.false.
 export modelspace_vloc=.true.
 export letkf_novlocal=.true.
+export ANAVINFO_ENKF=${scriptsdir}/global_anavinfo.l${LEVS}.txt.dpres
 
-export nobsl_max=1000
+export nobsl_max=4000
 export corrlengthnh=2000
 export corrlengthtr=2000
 export corrlengthsh=2000
@@ -307,6 +307,8 @@ export paoverpb_thresh=0.998  # ignored for LETKF, set to 1 to use all obs in se
 export saterrfact=1.0
 export deterministic=.true.
 export sortinc=.true.
+
+export taperanalperts=".true."
 
 # serial filter parameters
 # (from https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.3598)
@@ -328,9 +330,9 @@ export corrlengthsh=4000
 export lnsigcutoffpsnh=4
 export lnsigcutoffpstr=4
 export lnsigcutoffpssh=4
-# also turn on Huber norm (nonlinear QC)?
+export ANAVINFO_ENKF=${scriptsdir}/global_anavinfo.l${LEVS}.txt.ps
 
-export sprd_tol=3.2
+export sprd_tol=4.0
 
 # level for downwards extrap to surface for ps operator (should be just above PBL to avoid diurnal effects)
 if [ $LEVS -eq 127 ]; then
@@ -355,14 +357,13 @@ elif [ "$machine" == 'orion' ] || [ $machine == "hercules" ]; then
    export python=`which python`
    export fv3gfspath=/work/noaa/global/glopara/fix_NEW
    export FIXDIR=/work/noaa/nems/emc.nemspara/RT/NEMSfv3gfs/input-data-20220414
+   export FIXDIR_gcyc=${fv3gfspath}
    export FIXFV3=${fv3gfspath}/fix_fv3_gmted2010
    export FIXGLOBAL=${fv3gfspath}/fix_am
    export gsipath=/work/noaa/gsienkf/whitaker/GSI
    export fixgsi=${gsipath}/fix
    export fixcrtm=/work/noaa/global/glopara/crtm/crtm_v2.3.0
-   if [ $machine == "hercules" ]; then
-      export fixcrtm=$CRTM_FIX
-   fi
+   export fixcrtm=$CRTM_FIX
    export execdir=${scriptsdir}/exec_${machine}
    export gsiexec=${execdir}/gsi.x
 elif [ "$machine" == 'gaea' ]; then
@@ -388,8 +389,6 @@ export enkfbin=${execdir}/enkf.x
 
 
 # model space localization
-#export ANAVINFO_ENKF=${scriptsdir}/global_anavinfo.l${LEVS}.txt.dpres
-export ANAVINFO_ENKF=${scriptsdir}/global_anavinfo.l${LEVS}.txt.ps
 export CONVINFO=${scriptsdir}/global_convinfo.txt.psonly
 
 cd $scriptsdir

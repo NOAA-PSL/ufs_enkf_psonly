@@ -1,7 +1,7 @@
 #!/bin/sh
-#SBATCH -q urgent
+##SBATCH -q urgent
 #SBATCH -t 00:30:00
-#SBATCH -A da-cpu
+#SBATCH -A gsd-fv3-dev
 #SBATCH -N 1  
 #SBATCH --ntasks-per-node=80
 #SBATCH -p hercules
@@ -16,13 +16,13 @@ module load ${machine}
 module load wgrib2
 module list
 
-export exptname=C192L127ufs_psonly2
+export exptname=C96L127ufs_psonlyiau_gfsv16
 export basedir=/work2/noaa/gsienkf/${USER}
 export scriptsdir="${basedir}/scripts/${exptname}"
 export execdir=${scriptsdir}/exec_${machine}
 
-analdate='2021091900'
-while [ $analdate -le '2021092712' ]; do
+analdate='2021090818'
+while [ $analdate -le '2021091500' ]; do
 datapath=${basedir}/${exptname}
 YYYYMMDD=`echo $analdate | cut -c1-8`
 YYYY=`echo $analdate | cut -c1-4`

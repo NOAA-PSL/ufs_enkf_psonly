@@ -22,7 +22,9 @@ charnanal2=`printf %02i $nmem`
 export ISEED_SPPT=$((analdate*1000 + nmem*10 + 0 + niter))
 export ISEED_SKEB=$((analdate*1000 + nmem*10 + 1 + niter))
 export ISEED_SHUM=$((analdate*1000 + nmem*10 + 2 + niter))
-export ISEED_CA=$((analdate+nmem))
+#export ISEED_SPPT=$((analdate*1000 + nmem*10 + 0))
+#export ISEED_SKEB=$((analdate*1000 + nmem*10 + 1))
+#export ISEED_SHUM=$((analdate*1000 + nmem*10 + 2))
 export npx=`expr $RES + 1`
 export LEVP=`expr $LEVS \+ 1`
 # yr,mon,day,hr at middle of assim window (analysis time)
@@ -91,7 +93,7 @@ if [ $? -ne 0 ]; then
   echo "cd to ${datapath2}/${charnanal} failed, stopping..."
   exit 1
 fi
-/bin/rm -f dyn* phy* PET*
+/bin/rm -f dyn* phy* *nemsio* PET*
 export DIAG_TABLE=${DIAG_TABLE:-$scriptsdir/diag_table}
 /bin/cp -f $DIAG_TABLE diag_table
 /bin/cp -f $scriptsdir/ufs.configure .
@@ -117,55 +119,32 @@ fi
 
 # Grid and orography data
 n=1
-if [[ $RES -eq 96 ]]; then
-   fv3_input_data=FV3_input_data
-else
-   fv3_input_data=FV3_input_data${RES}
-fi
 while [ $n -le 6 ]; do
- ln -fs $FIXDIR/${fv3_input_data}/INPUT_L127/C${RES}_grid.tile${n}.nc C${RES}_grid.tile${n}.nc
- if [ $FRAC_GRID == ".true." ]; then
-    ln -fs $FIXDIR/FV3_fix_tiled/C${RES}/oro_C${RES}.${OCNRES}.tile${n}.nc oro_data.tile${n}.nc
- else
-    ln -fs $FIXDIR/${fv3_input_data}/INPUT_L127/oro_data.tile${n}.nc oro_data.tile${n}.nc
- fi
- ln -fs $FIXDIR/${fv3_input_data}/INPUT_L127/oro_data_ls.tile${n}.nc oro_data_ls.tile${n}.nc
- ln -fs $FIXDIR/${fv3_input_data}/INPUT_L127/oro_data_ss.tile${n}.nc oro_data_ss.tile${n}.nc
+ ln -fs $FIXFV3/C${RES}/C${RES}_grid.tile${n}.nc     C${RES}_grid.tile${n}.nc
+ ln -fs $FIXFV3/C${RES}/C${RES}_oro_data.tile${n}.nc oro_data.tile${n}.nc
  n=$((n+1))
 done
-if [ $FRAC_GRID == ".true." ]; then
-ln -fs $FIXDIR/${fv3_input_data}/INPUT/grid_spec.nc  C${RES}_mosaic.nc
-ln -fs $FIXDIR/CPL_FIX/aC${RES}o${ORES3}/grid_spec.nc  grid_spec.nc
-ln -fs $FIXDIR/MOM6_FIX/${ORES3}/ocean_mosaic.nc ocean_mosaic.nc
-else
-ln -fs $FIXDIR/${fv3_input_data}/INPUT/grid_spec.nc  grid_spec.nc
-fi
-# symlinks one level up from INPUT
+ln -fs $FIXFV3/C${RES}/C${RES}_mosaic.nc  grid_spec.nc
 cd ..
-/bin/cp -f $scriptsdir/noahmptable.tbl .
-#ln -fs $FIXDIR/FV3_fix/fix_co2_proj/* .
-#ln -fs /lustre/f2/dev/Jeffrey.S.Whitaker/fix_NEW/fix_am/co2dat_4a/* .
-export CO2DIR=${CO2DIR:-$FIXDIR/FV3_fix/fix_co2_proj}
-ln -fs $CO2DIR/* .
-#ln -fs $FIXDIR/FV3_fix/*grb .
-ln -fs $FIXDIR/FV3_fix/*txt .
-ln -fs $FIXDIR/FV3_fix/*f77 .
-ln -fs $FIXDIR/FV3_fix/*dat .
-ln -fs $FIXDIR/FV3_input_data_RRTMGP/* .
-ln -fs $FIXDIR/FV3_input_data_gsd/CCN_ACTIVATE.BIN CCN_ACTIVATE.BIN 
-ln -fs $FIXDIR/FV3_input_data_gsd/freezeH2O.dat freezeH2O.dat   
-ln -fs $FIXDIR/FV3_input_data_gsd/qr_acr_qg.dat qr_acr_qg.dat
-ln -fs $FIXDIR/FV3_input_data_gsd/qr_acr_qs.dat qr_acr_qs.dat 
-ln -fs $FIXDIR/FV3_input_data/ugwp_C384_tau.nc ugwp_limb_tau.nc
-# for ugwpv1 and MERRA aerosol climo (IAER=1011)
-for n in 01 02 03 04 05 06 07 08 09 10 11 12; do
-  ln -fs $FIXDIR/FV3_input_data_INCCN_aeroclim/MERRA2/merra2.aerclim.2003-2014.m${n}.nc aeroclim.m${n}.nc
+#ln -fs $FIXGLOBAL/global_o3prdlos.f77               global_o3prdlos.f77
+# new ozone and h2o physics for stratosphere
+ln -fs $FIXGLOBAL/ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77 global_o3prdlos.f77
+ln -fs $FIXGLOBAL/global_h2o_pltc.f77 global_h2oprdlos.f77 # used if h2o_phys=T
+# co2, ozone, surface emiss and aerosol data.
+ln -fs $FIXGLOBAL/global_solarconstant_noaa_an.txt  solarconstant_noaa_an.txt
+ln -fs $FIXGLOBAL/global_sfc_emissivity_idx.txt     sfc_emissivity_idx.txt
+ln -fs $FIXGLOBAL/global_co2historicaldata_glob.txt co2historicaldata_glob.txt
+ln -fs $FIXGLOBAL/co2monthlycyc.txt                 co2monthlycyc.txt
+for file in `ls $FIXGLOBAL/co2dat_4a/global_co2historicaldata* ` ; do
+   ln -fs $file $(echo $(basename $file) |sed -e "s/global_//g")
 done
-ln -fs  $FIXDIR/FV3_input_data_INCCN_aeroclim/aer_data/LUTS/optics_BC.v1_3.dat  optics_BC.dat
-ln -fs  $FIXDIR/FV3_input_data_INCCN_aeroclim/aer_data/LUTS/optics_OC.v1_3.dat  optics_OC.dat
-ln -fs  $FIXDIR/FV3_input_data_INCCN_aeroclim/aer_data/LUTS/optics_DU.v15_3.dat optics_DU.dat
-ln -fs  $FIXDIR/FV3_input_data_INCCN_aeroclim/aer_data/LUTS/optics_SS.v3_3.dat  optics_SS.dat
-ln -fs  $FIXDIR/FV3_input_data_INCCN_aeroclim/aer_data/LUTS/optics_SU.v1_3.dat  optics_SU.dat
+ln -fs $FIXGLOBAL/global_climaeropac_global.txt     aerosol.dat
+for file in `ls $FIXGLOBAL/global_volcanic_aerosols* ` ; do
+   ln -fs $file $(echo $(basename $file) |sed -e "s/global_//g")
+done
+# for Thompson microphysics
+#ln -fs $FIXGLOBAL/CCN_ACTIVATE.BIN CCN_ACTIVATE.BIN
+#ln -fs $FIXGLOBAL/freezeH2O.dat freezeH2O.dat
 
 # create netcdf increment files.
 if [ "$cold_start" == "false" ] && [ -z $skip_calc_increment ]; then
@@ -186,18 +165,18 @@ if [ "$cold_start" == "false" ] && [ -z $skip_calc_increment ]; then
    no_mpinc=.true.
    no_delzinc=.false.
    taper_strat=.true.
-   taper_strat_ozone=.true.
+   taper_strat_ozone=.false.
    taper_pbl=.false.
    ak_bot=10000.,
    ak_top=5000.
 /
 EOF
       cat calc_increment_ncio.nml
-      #export DONT_USE_DPRES=1
-      #export DONT_USE_DELZ=1
       echo "create ${increment_file}"
       /bin/rm -f ${increment_file}
       export "PGM=${execdir}/calc_increment_ncio.x ${fgfile} ${analfile} ${increment_file}"
+      #export DONT_USE_DPRES=1 # force recalculation of dpres increment from ps increment
+      #export DONT_USE_DELZ=1 # force recalculation of delz increment
       nprocs=1 mpitaskspernode=1 ${scriptsdir}/runmpi
       if [ $? -ne 0 -o ! -s ${increment_file} ]; then
          echo "problem creating ${increment_file}, stopping .."
@@ -214,21 +193,42 @@ EOF
       #fi
    done # do next forecast
    cd ..
+else
+   if [ $cold_start == "false" ] ; then
+      cd INPUT
+      iaufhrs2=`echo $iaufhrs | sed 's/,/ /g'`
+# move already computed increment files
+      for fh in $iaufhrs2; do
+         export increment_file="fv3_increment${fh}.nc"
+         /bin/mv -f ${datapath2}/incr_${analdate}_fhr0${fh}_${charnanal} ${increment_file}
+      done
+      cd ..
+   fi
 fi
 
 # setup model namelist parameters
-if [ "$cold_start" == "true" ]; then
+#skip_iau="true"
+if [ "$cold_start" == "true" ] || [ $skip_iau == "true" ] ; then
    # cold start from chgres'd GFS analyes
    stochini=F
    reslatlondynamics=""
    readincrement=F
-   FHCYC=0
-   iaudelthrs=-1
    #iau_inc_files="fv3_increment.nc"
    iau_inc_files=""
-   warm_start=F
-   externalic=T
-   mountain=F
+   if [ $skip_iau == "true" ]; then
+      warm_start=T
+      externalic=F
+      mountain=T
+      iaudelthrs=-1
+      iaufhrs=6
+      iau_inc_files=""
+   else
+      warm_start=F
+      externalic=T
+      mountain=F
+      FHCYC=0
+      iaudelthrs=-1
+   fi
 else
    warm_start=T
    externalic=F
@@ -267,8 +267,6 @@ fi
 #fntsfa=${sstpath}/${yeara}/sst_${charnanal2}.grib
 #fnacna=${sstpath}/${yeara}/icec_${charnanal2}.grib
 #fnsnoa='        ' # no input file, use model snow
-export FTSFS=99999 # no sst analysis, use model
-export FAISS=99999 # no sea ice analysis, use model
 
 # halve time step if niter>1 and niter==nitermax
 if [[ $niter -gt 1 ]] && [[ $niter -eq $nitermax ]]; then
@@ -284,12 +282,12 @@ snoid='SNOD'
 
 # Turn off snow analysis if it has already been used.
 # (snow analysis only available once per day at 18z)
-#fntsfa=${obs_datapath}/${RUN}.${yeara}${mona}${daya}/${houra}/atmos/${RUN}.t${houra}z.rtgssthr.grb
-#fnacna=${obs_datapath}/${RUN}.${yeara}${mona}${daya}/${houra}/atmos/${RUN}.t${houra}z.seaice.5min.grb
-fntsfa=${sstice_datapath}/era5_sst_${yeara}${mona}.grib
-fnacna=${sstice_datapath}/era5_ice_${yeara}${mona}.grib
-fnsnoa=${obs_datapath}/${RUN}.${yeara}${mona}${daya}/${houra}/atmos/${RUN}.t${houra}z.snogrb_t1534.3072.1536
-fnsnog=${obs_datapath}/${RUN}.${yearprev}${monprev}${dayprev}/${hourprev}/atmos/${RUN}.t${hourprev}z.snogrb_t1534.3072.1536
+#fntsfa=${sstice_datapath}/era5_sst_${yeara}${mona}.grib
+#fnacna=${sstice_datapath}/era5_ice_${yeara}${mona}.grib
+fntsfa=${sstice_datapath}/${RUN}.${yeara}${mona}${daya}/${houra}/atmos/${RUN}.t${houra}z.rtgssthr.grb
+fnacna=${sstice_datapath}/${RUN}.${yeara}${mona}${daya}/${houra}/atmos/${RUN}.t${houra}z.seaice.5min.grb
+fnsnoa=${sstice_datapath}/${RUN}.${yeara}${mona}${daya}/${houra}/atmos/${RUN}.t${houra}z.snogrb_t1534.3072.1536
+fnsnog=${sstice_datapath}/${RUN}.${yearprev}${monprev}${dayprev}/${hourprev}/atmos/${RUN}.t${hourprev}z.snogrb_t1534.3072.1536
 #nrecs_snow=`$WGRIB ${fnsnoa} | grep -i $snoid | wc -l`
 nrecs_snow=0 # force no snow update (do this if NOAH-MP used)
 if [ $nrecs_snow -eq 0 ]; then
@@ -314,7 +312,17 @@ fi
 
 ls -l 
 
-longer_fcst="NO"
+if [ $nanals2 -gt 0 ] && [ $nmem -le $nanals2 ]; then
+   longer_fcst="YES"
+   # if longfcst_singletime=0, FHMAX_LONGER is divisible by 6, and only a single forecast time
+   # (the end of the forecast) beyond FHMAX is saved.  If longfcst_singletime=3, then it is 
+   # assumed that all the times in the 6-h window centered on FHMAX_LONGER - 3 are desired so
+   # that the GSI observer can be run.
+   longfcst_singletime=`python -c "from __future__ import print_function; print($FHMAX_LONGER % 6)"`
+   echo "longfcst_singletime=$longfcst_singletime"
+else
+   longer_fcst="NO"
+fi
 if [ "${iau_delthrs}" != "-1" ]; then
    if [ $longer_fcst = "YES" ]; then
       FHMAX_FCST=`expr $FHMAX_LONGER + $ANALINC`
@@ -334,6 +342,46 @@ else
    else
       FHMAX_FCST=$FHMAX
    fi
+fi
+
+#if [ $FHCYC -gt 0 ]; then
+  skip_global_cycle=1
+#fi
+
+if [ $cold_start = "false" ] && [ -z $skip_global_cycle ]; then
+   # run global_cycle to update surface in restart file.
+   export BASE_GSM=${fv3gfspath}
+   export FIXfv3=$FIXFV3
+   # global_cycle chokes for 3,9,15,18 UTC hours in CDATE
+   #export CDATE="${year_start}${mon_start}${day_start}${hour_start}"
+   export CDATE=${analdate}
+   export CYCLEXEC=${execdir}/global_cycle
+   export CYCLESH=${scriptsdir}/global_cycle.sh
+   export COMIN=${PWD}/INPUT
+   export COMOUT=$COMIN
+   export FNTSFA="${fntsfa}"
+   export FNSNOA="${fnsnoa}"
+   export FNACNA="${fnacna}"
+   export CASE="C${RES}"
+   export PGM="${execdir}/global_cycle"
+   if [ $NST_GSI -gt 0 ]; then
+       export GSI_FILE=${datapath2}/${PREINP}dtfanl.nc
+   fi
+   sh ${scriptsdir}/global_cycle_driver.sh
+   n=1
+   while [ $n -le 6 ]; do
+     ls -l ${COMOUT}/sfcanl_data.tile${n}.nc
+     ls -l ${COMOUT}/sfc_data.tile${n}.nc
+     if [ -s ${COMOUT}/sfcanl_data.tile${n}.nc ]; then
+         /bin/mv -f ${COMOUT}/sfcanl_data.tile${n}.nc ${COMOUT}/sfc_data.tile${n}.nc
+     else
+         echo "global_cycle failed, exiting .."
+         exit 1
+     fi
+     ls -l ${COMOUT}/sfc_data.tile${n}.nc
+     n=$((n+1))
+   done
+   /bin/rm -rf rundir*
 fi
 
 # NSST Options
@@ -376,7 +424,16 @@ else
    output_1st_tstep_rst=".false."
 fi
 
+if [ $skip_iau == "true" ]; then
+    iau_offset=$iaufhrs
+else
+    iau_offset=$iaudelthrs
+fi
+
 cat > model_configure <<EOF
+print_esmf:              .true.
+total_member:            1
+PE_MEMBER01:             ${nprocs}
 start_year:              ${year}
 start_month:             ${mon}
 start_day:               ${day}
@@ -385,6 +442,8 @@ start_minute:            0
 start_second:            0
 nhours_fcst:             ${FHMAX_FCST}
 fhrot:                   ${FHROT}
+RUN_CONTINUE:            F
+ENS_SPS:                 F
 dt_atmos:                ${dt_atmos} 
 output_1st_tstep_rst:    ${output_1st_tstep_rst}
 calendar:                'julian'
@@ -394,17 +453,14 @@ atmos_nthreads:          ${OMP_NUM_THREADS}
 use_hyper_thread:        F
 ncores_per_node:         ${corespernode}
 restart_interval:        ${restart_interval}
-quilting:                T
-quilting_restart:        T
-output_history:          T
+quilting:                .true.
 write_groups:            ${write_groups}
 write_tasks_per_group:   ${write_tasks}
 num_files:               2
 filename_base:           'dyn' 'phy'
 output_grid:             'gaussian_grid'
 output_file:             'netcdf_parallel' 'netcdf'
-quantize_mode:           'quantize_bitround'
-quantize_nsd:            14
+nbits:                   14
 ideflate:                1
 ichunk2d:                ${LONB}
 jchunk2d:                ${LATB}
@@ -412,10 +468,13 @@ ichunk3d:                0
 jchunk3d:                0
 kchunk3d:                0
 write_nsflip:            .true.
-iau_offset:              ${iaudelthrs}
+iau_offset:              ${iau_offset}
 imo:                     ${LONB}
 jmo:                     ${LATB}
 output_fh:               ${FHOUT} -1
+nfhmax_hf:               -1
+nfhout_hf:               -1
+nsout:                   -1
 EOF
 cat model_configure
 
@@ -443,8 +502,6 @@ sed -i -e "s/CDMBGWD/${cdmbgwd}/g" input.nml
 sed -i -e "s/ISEED_sppt/${ISEED_SPPT}/g" input.nml
 sed -i -e "s/ISEED_shum/${ISEED_SHUM}/g" input.nml
 sed -i -e "s/ISEED_skeb/${ISEED_SKEB}/g" input.nml
-sed -i -e "s/ISEED_CA/${ISEED_CA}/g" input.nml
-sed -i -e "s/FRAC_GRID/${FRAC_GRID}/g" input.nml
 sed -i -e "s/IAU_FHRS/${iaufhrs}/g" input.nml
 sed -i -e "s/IAU_DELTHRS/${iaudelthrs}/g" input.nml
 sed -i -e "s/IAU_INC_FILES/${iau_inc_files}/g" input.nml
@@ -456,12 +513,11 @@ sed -i -e "s/READ_INCREMENT/${readincrement}/g" input.nml
 sed -i -e "s/HYDROSTATIC/${hydrostatic}/g" input.nml
 sed -i -e "s/LAUNCH_LEVEL/${launch_level}/g" input.nml
 sed -i -e "s/FHCYC/${FHCYC}/g" input.nml
-sed -i -e "s!FIXDIR!${FIXDIR}!g" input.nml
+sed -i -e "s!FIXDIR!${FIXDIR_gcyc}!g" input.nml
 sed -i -e "s!SSTFILE!${fntsfa}!g" input.nml
 sed -i -e "s!ICEFILE!${fnacna}!g" input.nml
 sed -i -e "s!SNOFILE!${fnsnoa}!g" input.nml
 sed -i -e "s/FSNOL_PARM/${FSNOL}/g" input.nml
-sed -i -e "s/CRES/C${RES}/g" input.nml
 cat input.nml
 ls -l INPUT
 
@@ -478,6 +534,7 @@ else
 fi
 
 export DATOUT=${DATOUT:-$datapathp1}
+
 # this is a hack to work around the fact that first time step history
 # file is not written if restart file requested at first time step.
 if [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ]; then
