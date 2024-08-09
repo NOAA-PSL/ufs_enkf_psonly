@@ -1,0 +1,22 @@
+#!/bin/sh
+##SBATCH -q urgent
+#SBATCH -t 02:30:00
+#SBATCH -A gsienkf
+#SBATCH -N 80  
+#SBATCH --ntasks-per-node=40
+#SBATCH -p orion
+#SBATCH -J ufs_enkf_psonly
+#SBATCH -e ufs_enkf_psonly.out
+#SBATCH -o ufs_enkf_psonly.out        
+
+export NODES=$SLURM_NNODES
+export corespernode=$SLURM_CPUS_ON_NODE
+export machine='orion'
+
+export fg_proc=`expr 2 \* $corespernode`
+export fg_threads=1 
+export enkf_threads=10
+export gsi_control_threads=10
+export write_groups=1
+export write_tasks=8 
+export layout="3, 4"
