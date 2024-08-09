@@ -175,9 +175,7 @@ export NST_GSI=0          # default 0: No NST info at all;
 
 if [ $NST_GSI -gt 0 ]; then export NSTINFO=4; fi
 
-#export SUITE="FV3_GFS_v17_p8"
 export SUITE="FV3_GFS_v16"
-#export SUITE="FV3_GFS_v15p2"
 
 # stochastic physics parameters.
 export DO_SPPT=T
@@ -313,13 +311,7 @@ export ANAVINFO_ENKF=${scriptsdir}/global_anavinfo.l${LEVS}.txt.ps
 export sprd_tol=4.0
 
 # level for downwards extrap to surface for ps operator (should be just above PBL to avoid diurnal effects)
-if [ $LEVS -eq 127 ]; then
-   export nlevt=29
-elif [ $LEVS -eq 64 ]; then
-   export nlevt=14
-else
-   export nlevt=1
-fi
+export nlevt=29 # for 127 level model
 
 if [ "$machine" == 'hera' ]; then
    export python=/contrib/anaconda/2.3.0/bin/python
