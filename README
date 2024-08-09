@@ -43,6 +43,8 @@ upp.x is from github.com/ufs-community/UFS_UTILS
 
 fv3_intel.exe is from latest develop github.com/ufs-community/ufs-weather-model.
 
+Reads obs in text files generated from prepbufr files using the read_ps_prepbufr.py utility (run using getpsobs.hs).
+
 to turn off IAU, set iaudelthrs=-1 and iaufhrs=6 in config.sh
 
 Currently only hercules is supported, but I can easily add other RDHPCS platforms.
