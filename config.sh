@@ -63,7 +63,7 @@ elif [ "$machine" == 'orion' ]; then
    export hsidir="/ESRL/BMC/gsienkf/2year/whitaker/${exptname}"
    export obs_datapath=/work2/noaa/gsienkf/whitaker/psobs
    export sstice_datapath=/work2/noaa/gsienkf/whitaker/era5sstice
-   export sstice_datapath=/work/noaa/rstprod/dump
+   #export sstice_datapath=/work/noaa/rstprod/dump
    ulimit -s unlimited
    module use /work/noaa/epic/role-epic/spack-stack/orion/spack-stack-1.6.0/envs/gsi-addon-env-rocky9/install/modulefiles/Core 
    module load stack-intel/2021.9.0

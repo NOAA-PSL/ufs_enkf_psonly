@@ -282,10 +282,10 @@ snoid='SNOD'
 
 # Turn off snow analysis if it has already been used.
 # (snow analysis only available once per day at 18z)
-#fntsfa=${sstice_datapath}/era5_sst_${yeara}${mona}.grib
-#fnacna=${sstice_datapath}/era5_ice_${yeara}${mona}.grib
-fntsfa=${sstice_datapath}/${RUN}.${yeara}${mona}${daya}/${houra}/atmos/${RUN}.t${houra}z.rtgssthr.grb
-fnacna=${sstice_datapath}/${RUN}.${yeara}${mona}${daya}/${houra}/atmos/${RUN}.t${houra}z.seaice.5min.grb
+fntsfa=${sstice_datapath}/era5_sst_${yeara}${mona}.grib
+fnacna=${sstice_datapath}/era5_ice_${yeara}${mona}.grib
+#fntsfa=${sstice_datapath}/${RUN}.${yeara}${mona}${daya}/${houra}/atmos/${RUN}.t${houra}z.rtgssthr.grb
+#fnacna=${sstice_datapath}/${RUN}.${yeara}${mona}${daya}/${houra}/atmos/${RUN}.t${houra}z.seaice.5min.grb
 fnsnoa=${sstice_datapath}/${RUN}.${yeara}${mona}${daya}/${houra}/atmos/${RUN}.t${houra}z.snogrb_t1534.3072.1536
 fnsnog=${sstice_datapath}/${RUN}.${yearprev}${monprev}${dayprev}/${hourprev}/atmos/${RUN}.t${hourprev}z.snogrb_t1534.3072.1536
 #nrecs_snow=`$WGRIB ${fnsnoa} | grep -i $snoid | wc -l`
