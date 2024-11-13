@@ -358,7 +358,7 @@ export FCSTEXEC=${execdir}/fv3_intel.exe
 export enkfbin=${execdir}/enkf.x
 
 
-# model space localization
+# ps only convinfo file
 export CONVINFO=${scriptsdir}/global_convinfo.txt.psonly
 
 cd $scriptsdir
