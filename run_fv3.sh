@@ -251,6 +251,8 @@ else
          iau_inc_files="'fv3_increment3.nc','fv3_increment6.nc','fv3_increment9.nc'"
       elif [ "$iaufhrs" == "6" ]; then
          iau_inc_files="'fv3_increment6.nc'"
+      elif [ "$iaufhrs" == "1" ]; then
+         iau_inc_files="'fv3_increment1.nc'"
       else
          echo "illegal value for iaufhrs"
          exit 1
@@ -258,7 +260,7 @@ else
       reslatlondynamics=""
       readincrement=F
    else
-      reslatlondynamics="fv3_increment6.nc"
+      reslatlondynamics="fv3_increment${ANALINC}.nc"
       readincrement=T
       iau_inc_files=""
    fi

@@ -224,14 +224,13 @@ export FHMAX=1
 export FHOUT=1
 export FHCYC=6
 export FRAC_GRID=.true.
-export RESTART_FREQ=0.5
+export RESTART_FREQ=1
 FHMAXP1=`expr $FHMAX + 1`
 export FHMAX_LONGER=`expr $FHMAX + $ANALINC`
 export enkfstatefhrs=`python -c "from __future__ import print_function; print(list(range(${FHMIN},${FHMAXP1},${FHOUT})))" | cut -f2 -d"[" | cut -f1 -d"]"`
-#export iaufhrs=3,6,9
-#export iau_delthrs="6" # iau_delthrs < 0 turns IAU off
+export iaufhrs="1"
+export iau_delthrs=1
 # IAU off
-export iaufhrs="6"
 export iau_delthrs=-1
 
 export nitermax=2 # number of retries
