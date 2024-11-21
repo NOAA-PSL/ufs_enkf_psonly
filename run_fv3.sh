@@ -36,56 +36,20 @@ export yearprev=`echo $analdatem1 |cut -c 1-4`
 export monprev=`echo $analdatem1 |cut -c 5-6`
 export dayprev=`echo $analdatem1 |cut -c 7-8`
 export hourprev=`echo $analdatem1 |cut -c 9-10`
-#analdatep1m3=`$incdate $analdatep1 -3`
-if [ "${iau_delthrs}" != "-1" ] && [ "${cold_start}" == "false" ]; then
-# assume model is started at beginning of analysis window
-# (if IAU on or initial cold start)
-   # start date for forecast (previous analysis time)
-   export year=`echo $analdatem1 |cut -c 1-4`
-   export mon=`echo $analdatem1 |cut -c 5-6`
-   export day=`echo $analdatem1 |cut -c 7-8`
-   export hour=`echo $analdatem1 |cut -c 9-10`
-   # current date in restart (beginning of analysis window)
-   export year_start=`echo $analdatem3 |cut -c 1-4`
-   export mon_start=`echo $analdatem3 |cut -c 5-6`
-   export day_start=`echo $analdatem3 |cut -c 7-8`
-   export hour_start=`echo $analdatem3 |cut -c 9-10`
-   # end time of analysis window (time for next restart)
-   export yrnext=`echo $analdatep1m3 |cut -c 1-4`
-   export monnext=`echo $analdatep1m3 |cut -c 5-6`
-   export daynext=`echo $analdatep1m3 |cut -c 7-8`
-   export hrnext=`echo $analdatep1m3 |cut -c 9-10`
-else
-   # if no IAU, start date is middle of window
-   export year=`echo $analdate |cut -c 1-4`
-   export mon=`echo $analdate |cut -c 5-6`
-   export day=`echo $analdate |cut -c 7-8`
-   export hour=`echo $analdate |cut -c 9-10`
-   # date in restart file is same as start date (not continuing a forecast)
-   export year_start=`echo $analdate |cut -c 1-4`
-   export mon_start=`echo $analdate |cut -c 5-6`
-   export day_start=`echo $analdate |cut -c 7-8`
-   export hour_start=`echo $analdate |cut -c 9-10`
-   export yrp3=`echo $analdatep1m3 |cut -c 1-4`
-   export monp3=`echo $analdatep1m3 |cut -c 5-6`
-   export dayp3=`echo $analdatep1m3 |cut -c 7-8`
-   export hrp3=`echo $analdatep1m3 |cut -c 9-10`
-   # time for restart file
-   if [ "${iau_delthrs}" != "-1" ] ; then
-      # beginning of next analysis window
-      export yrnext=$yrp3
-      export monnext=$monp3
-      export daynext=$dayp3
-      export hrnext=$hrp3
-   else
-      # end of next analysis window
-      export yrnext=`echo $analdatep1 |cut -c 1-4`
-      export monnext=`echo $analdatep1 |cut -c 5-6`
-      export daynext=`echo $analdatep1 |cut -c 7-8`
-      export hrnext=`echo $analdatep1 |cut -c 9-10`
-   fi
-fi
-
+export year=`echo $analdate |cut -c 1-4`
+export mon=`echo $analdate |cut -c 5-6`
+export day=`echo $analdate |cut -c 7-8`
+export hour=`echo $analdate |cut -c 9-10`
+# date in restart file is same as start date (not continuing a forecast)
+export year_start=`echo $analdate |cut -c 1-4`
+export mon_start=`echo $analdate |cut -c 5-6`
+export day_start=`echo $analdate |cut -c 7-8`
+export hour_start=`echo $analdate |cut -c 9-10`
+# end of next analysis window
+export yrnext=`echo $analdatep1 |cut -c 1-4`
+export monnext=`echo $analdatep1 |cut -c 5-6`
+export daynext=`echo $analdatep1 |cut -c 7-8`
+export hrnext=`echo $analdatep1 |cut -c 9-10`
 
 # copy data, diag and field tables.
 cd ${datapath2}/${charnanal}
@@ -149,17 +113,16 @@ done
 # create netcdf increment files.
 if [ "$cold_start" == "false" ] && [ -z $skip_calc_increment ]; then
    cd INPUT
-   iaufhrs2=`echo $iaufhrs | sed 's/,/ /g'`
 # IAU - multiple increments.
-   for fh in $iaufhrs2; do
-      export increment_file="fv3_increment${fh}.nc"
-      if [ $charnanal == "control" ] && [ "$replay_controlfcst" == 'true' ]; then
-         export analfile="${datapath2}/sanl_${analdate}_fhr0${fh}_ensmean"
-         export fgfile="${datapath2}/sfg_${analdate}_fhr0${fh}_${charnanal}.chgres"
-      else
-         export analfile="${datapath2}/sanl_${analdate}_fhr0${fh}_${charnanal}"
-         export fgfile="${datapath2}/sfg_${analdate}_fhr0${fh}_${charnanal}"
-      fi
+   fh=$ANALINC
+   export increment_file="fv3_increment${fh}.nc"
+   if [ $charnanal == "control" ] && [ "$replay_controlfcst" == 'true' ]; then
+      export analfile="${datapath2}/sanl_${analdate}_fhr0${fh}_ensmean"
+      export fgfile="${datapath2}/sfg_${analdate}_fhr0${fh}_${charnanal}.chgres"
+   else
+      export analfile="${datapath2}/sanl_${analdate}_fhr0${fh}_${charnanal}"
+      export fgfile="${datapath2}/sfg_${analdate}_fhr0${fh}_${charnanal}"
+   fi
    cat > calc_increment_ncio.nml << EOF
 &setup
    no_mpinc=.true.
@@ -171,64 +134,42 @@ if [ "$cold_start" == "false" ] && [ -z $skip_calc_increment ]; then
    ak_top=5000.
 /
 EOF
-      cat calc_increment_ncio.nml
-      echo "create ${increment_file}"
-      /bin/rm -f ${increment_file}
-      export "PGM=${execdir}/calc_increment_ncio.x ${fgfile} ${analfile} ${increment_file}"
-      #export DONT_USE_DPRES=1 # force recalculation of dpres increment from ps increment
-      #export DONT_USE_DELZ=1 # force recalculation of delz increment
-      nprocs=1 mpitaskspernode=1 ${scriptsdir}/runmpi
-      if [ $? -ne 0 -o ! -s ${increment_file} ]; then
-         echo "problem creating ${increment_file}, stopping .."
-         exit 1
-      fi
-      #echo "create ${increment_file}"
-      #/bin/rm -f ${increment_file}
-      ## last three args:  no_mpinc no_delzinc, taper_strat
-      #export "PGM=${execdir}/calc_increment_ncio.x ${fgfile} ${analfile} ${increment_file} T $hydrostatic T"
-      #nprocs=1 mpitaskspernode=1 ${scriptsdir}/runmpi
-      #if [ $? -ne 0 -o ! -s ${increment_file} ]; then
-      #   echo "problem creating ${increment_file}, stopping .."
-      #   exit 1
-      #fi
-   done # do next forecast
+   cat calc_increment_ncio.nml
+   echo "create ${increment_file}"
+   /bin/rm -f ${increment_file}
+   export "PGM=${execdir}/calc_increment_ncio.x ${fgfile} ${analfile} ${increment_file}"
+   #export DONT_USE_DPRES=1 # force recalculation of dpres increment from ps increment
+   #export DONT_USE_DELZ=1 # force recalculation of delz increment
+   nprocs=1 mpitaskspernode=1 ${scriptsdir}/runmpi
+   if [ $? -ne 0 -o ! -s ${increment_file} ]; then
+      echo "problem creating ${increment_file}, stopping .."
+      exit 1
+   fi
    cd ..
 else
    if [ $cold_start == "false" ] ; then
       cd INPUT
-      iaufhrs2=`echo $iaufhrs | sed 's/,/ /g'`
 # move already computed increment files
-      for fh in $iaufhrs2; do
-         export increment_file="fv3_increment${fh}.nc"
-         /bin/mv -f ${datapath2}/incr_${analdate}_fhr0${fh}_${charnanal} ${increment_file}
-      done
+      fh=$ANALINC
+      export increment_file="fv3_increment${fh}.nc"
+      /bin/mv -f ${datapath2}/incr_${analdate}_fhr0${fh}_${charnanal} ${increment_file}
       cd ..
    fi
 fi
 
 # setup model namelist parameters
-#skip_iau="true"
-if [ "$cold_start" == "true" ] || [ $skip_iau == "true" ] ; then
+if [ "$cold_start" == "true" ] ; then
    # cold start from chgres'd GFS analyes
    stochini=F
    reslatlondynamics=""
    readincrement=F
    #iau_inc_files="fv3_increment.nc"
    iau_inc_files=""
-   if [ $skip_iau == "true" ]; then
-      warm_start=T
-      externalic=F
-      mountain=T
-      iaudelthrs=-1
-      iaufhrs=6
-      iau_inc_files=""
-   else
-      warm_start=F
-      externalic=T
-      mountain=F
-      FHCYC=0
-      iaudelthrs=-1
-   fi
+   warm_start=F
+   externalic=T
+   mountain=F
+   FHCYC=0
+   iaudelthrs=-1
 else
    warm_start=T
    externalic=F
@@ -245,13 +186,7 @@ else
    iaudelthrs=${iau_delthrs}
    FHCYC=${FHCYC}
    if [ "${iau_delthrs}" != "-1" ]; then
-      if [ "$iaufhrs" == "3,4,5,6,7,8,9" ]; then
-         iau_inc_files="'fv3_increment3.nc','fv3_increment4.nc','fv3_increment5.nc','fv3_increment6.nc','fv3_increment7.nc','fv3_increment8.nc','fv3_increment9.nc'"
-      elif [ "$iaufhrs" == "3,6,9" ]; then
-         iau_inc_files="'fv3_increment3.nc','fv3_increment6.nc','fv3_increment9.nc'"
-      elif [ "$iaufhrs" == "6" ]; then
-         iau_inc_files="'fv3_increment6.nc'"
-      elif [ "$iaufhrs" == "1" ]; then
+      if [ "$iaufhrs" == "0.5" ]; then
          iau_inc_files="'fv3_increment1.nc'"
       else
          echo "illegal value for iaufhrs"
@@ -325,25 +260,10 @@ if [ $nanals2 -gt 0 ] && [ $nmem -le $nanals2 ]; then
 else
    longer_fcst="NO"
 fi
-if [ "${iau_delthrs}" != "-1" ]; then
-   if [ $longer_fcst = "YES" ]; then
-      FHMAX_FCST=`expr $FHMAX_LONGER + $ANALINC`
-   else
-      FHMAX_FCST=`expr $FHMAX + $ANALINC`
-   fi
-   if [ ${cold_start} = "true" ]; then
-      if [ $longer_fcst = "YES" ]; then
-         FHMAX_FCST=$FHMAX_LONGER
-      else
-         FHMAX_FCST=$FHMAX
-      fi
-   fi
+if [ $longer_fcst = "YES" ]; then
+   FHMAX_FCST=$FHMAX_LONGER
 else
-   if [ $longer_fcst = "YES" ]; then
-      FHMAX_FCST=$FHMAX_LONGER
-   else
-      FHMAX_FCST=$FHMAX
-   fi
+   FHMAX_FCST=$FHMAX
 fi
 
 #if [ $FHCYC -gt 0 ]; then
@@ -408,30 +328,9 @@ if [ $NST_GSI -gt 0 ] && [ $FHCYC -gt 0 ]; then
    fnacna='        '
 fi
 export timestep_hrs=`python -c "from __future__ import print_function; print($dt_atmos / 3600.)"`
-#if [ "${iau_delthrs}" != "-1" ]  && [ "${cold_start}" == "false" ]; then
-#   FHROT=3
-#else
-#   if [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ]; then
-#     FHROT=3
-#   else
-#     FHROT=0
-#   fi
-#fi
 FHROT=0
-if [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ] && [ "${iau_delthrs}" != "-1" ]; then
-   # cold start ICS at end of window, need one timestep restart
-   restart_interval=`python -c "from __future__ import print_function; print($FHROT + $timestep_hrs)"`
-   output_1st_tstep_rst=".true."
-else
-   restart_interval="$RESTART_FREQ -1"
-   output_1st_tstep_rst=".false."
-fi
-
-if [ $skip_iau == "true" ]; then
-    iau_offset=$iaufhrs
-else
-    iau_offset=$iaudelthrs
-fi
+restart_interval="$RESTART_FREQ -1"
+output_1st_tstep_rst=".false."
 
 cat > model_configure <<EOF
 print_esmf:              .true.
@@ -471,7 +370,7 @@ ichunk3d:                0
 jchunk3d:                0
 kchunk3d:                0
 write_nsflip:            .true.
-iau_offset:              ${iau_offset}
+iau_offset:              0
 imo:                     ${LONB}
 jmo:                     ${LATB}
 output_fh:               ${FHOUT} -1

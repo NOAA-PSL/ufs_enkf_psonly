@@ -228,9 +228,11 @@ export RESTART_FREQ=1
 FHMAXP1=`expr $FHMAX + 1`
 export FHMAX_LONGER=`expr $FHMAX + $ANALINC`
 export enkfstatefhrs=`python -c "from __future__ import print_function; print(list(range(${FHMIN},${FHMAXP1},${FHOUT})))" | cut -f2 -d"[" | cut -f1 -d"]"`
-export iaufhrs="1"
-export iau_delthrs=1
+# increment applied during subsequent 1-h forecast (window not centered on analysis time - starts at analysis time)
+#export iaufhrs="0.5"
+#export iau_delthrs=1
 # IAU off
+export iaufhrs="1"
 export iau_delthrs=-1
 
 export nitermax=2 # number of retries
