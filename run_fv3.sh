@@ -406,15 +406,16 @@ if [ $NST_GSI -gt 0 ] && [ $FHCYC -gt 0 ]; then
    fnacna='        '
 fi
 export timestep_hrs=`python -c "from __future__ import print_function; print($dt_atmos / 3600.)"`
-if [ "${iau_delthrs}" != "-1" ]  && [ "${cold_start}" == "false" ]; then
-   FHROT=3
-else
-   if [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ]; then
-     FHROT=3
-   else
-     FHROT=0
-   fi
-fi
+#if [ "${iau_delthrs}" != "-1" ]  && [ "${cold_start}" == "false" ]; then
+#   FHROT=3
+#else
+#   if [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ]; then
+#     FHROT=3
+#   else
+#     FHROT=0
+#   fi
+#fi
+FHROT=0
 if [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ] && [ "${iau_delthrs}" != "-1" ]; then
    # cold start ICS at end of window, need one timestep restart
    restart_interval=`python -c "from __future__ import print_function; print($FHROT + $timestep_hrs)"`

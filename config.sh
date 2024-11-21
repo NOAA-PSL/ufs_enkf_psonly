@@ -9,7 +9,7 @@ export LEVS=127
 export OCNRES="mx100"
 export ORES3=`echo $OCNRES | cut -c3-5`
 
-export exptname="C${RES}L${LEVS}ufs_psonlyiau_gfsv16"
+export exptname="C${RES}L${LEVS}ufs_psonlynoiau_gfsv16_hrly"
 
 export fg_gfs="run_ens_fv3.sh"
 export rungfs="run_fv3.sh"
@@ -217,22 +217,22 @@ else
 fi
 
 export nanals=80
-export ANALINC=6
+export ANALINC=1
 export RUN='gdas'
-export FHMIN=3
-export FHMAX=9
-export FHOUT=3
+export FHMIN=1
+export FHMAX=1
+export FHOUT=1
 export FHCYC=6
 export FRAC_GRID=.true.
-export RESTART_FREQ=3
+export RESTART_FREQ=0.5
 FHMAXP1=`expr $FHMAX + 1`
 export FHMAX_LONGER=`expr $FHMAX + $ANALINC`
 export enkfstatefhrs=`python -c "from __future__ import print_function; print(list(range(${FHMIN},${FHMAXP1},${FHOUT})))" | cut -f2 -d"[" | cut -f1 -d"]"`
-export iaufhrs=3,6,9
-export iau_delthrs="6" # iau_delthrs < 0 turns IAU off
+#export iaufhrs=3,6,9
+#export iau_delthrs="6" # iau_delthrs < 0 turns IAU off
 # IAU off
-#export iaufhrs="6"
-#export iau_delthrs=-1
+export iaufhrs="6"
+export iau_delthrs=-1
 
 export nitermax=2 # number of retries
 export scriptsdir="${basedir}/scripts/${exptname}"

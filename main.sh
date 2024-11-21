@@ -107,7 +107,7 @@ if [ $modelspace_vloc ==  ".true." ]; then # run on ens mean, save jacobian
    cat > psop.nml << EOF
 &nam_psop
   nlevt=${nlevt},fhmin=$FHMIN,fhmax=$FHMAX,fhout=${FHOUT},
-  datestring="${analdate}",obsfile="${obs_datapath}/psobs_${analdate}.txt",zthresh=1000,ps_ind=128,
+  datestring="${analdate}",obsfile="${obs_datapath}/psobs1_${analdate}.txt",zthresh=1000,ps_ind=128,
 /
 EOF
    cat psop.nml
@@ -125,7 +125,7 @@ else # run on every member (and ensemble mean)
    cat > psop.nml << EOF
 &nam_psop
   nlevt=${nlevt},fhmin=$FHMIN,fhmax=$FHMAX,fhout=${FHOUT},nanals=${nanals},
-  datestring="${analdate}",obsfile="${obs_datapath}/psobs_${analdate}.txt",zthresh=1000,
+  datestring="${analdate}",obsfile="${obs_datapath}/psobs1_${analdate}.txt",zthresh=1000,
 /
 EOF
    cat psop.nml
@@ -156,6 +156,15 @@ if [ $write_ensmean == ".false." ]; then
 fi
 
 fi # skip to here if fg_only = true
+
+if [ $FHCYC -gt 0 ]; then
+   if [ $hr = "00" ] || [ $hr = "06" ] || [ $hr = "12" ] || [ $hr = "18" ]; then
+    echo "gcycle will be run with FHCYC=$FHCYC"
+   else
+    export FHCYC=0
+    echo "don't run gcycle"
+   fi
+fi
 
 echo "$analdate run enkf ens first guess `date`"
 sh ${scriptsdir}/run_fg_ens.sh > ${current_logdir}/run_fg_ens.out  2>&1
