@@ -114,16 +114,17 @@ done
 if [ "$cold_start" == "false" ] && [ -z $skip_calc_increment ]; then
    cd INPUT
 # IAU - multiple increments.
-   fh=$ANALINC
-   export increment_file="fv3_increment${fh}.nc"
-   if [ $charnanal == "control" ] && [ "$replay_controlfcst" == 'true' ]; then
-      export analfile="${datapath2}/sanl_${analdate}_fhr0${fh}_ensmean"
-      export fgfile="${datapath2}/sfg_${analdate}_fhr0${fh}_${charnanal}.chgres"
-   else
-      export analfile="${datapath2}/sanl_${analdate}_fhr0${fh}_${charnanal}"
-      export fgfile="${datapath2}/sfg_${analdate}_fhr0${fh}_${charnanal}"
-   fi
-   cat > calc_increment_ncio.nml << EOF
+   fhrs=`echo $analfhrs | sed 's/,/ /g'`
+   for fh in $fhrs; do
+      export increment_file="fv3_increment${fh}.nc"
+      if [ $charnanal == "control" ] && [ "$replay_controlfcst" == 'true' ]; then
+         export analfile="${datapath2}/sanl_${analdate}_fhr0${fh}_ensmean"
+         export fgfile="${datapath2}/sfg_${analdate}_fhr0${fh}_${charnanal}.chgres"
+      else
+         export analfile="${datapath2}/sanl_${analdate}_fhr0${fh}_${charnanal}"
+         export fgfile="${datapath2}/sfg_${analdate}_fhr0${fh}_${charnanal}"
+      fi
+      cat > calc_increment_ncio.nml << EOF
 &setup
    no_mpinc=.true.
    no_delzinc=.false.
@@ -134,25 +135,27 @@ if [ "$cold_start" == "false" ] && [ -z $skip_calc_increment ]; then
    ak_top=5000.
 /
 EOF
-   cat calc_increment_ncio.nml
-   echo "create ${increment_file}"
-   /bin/rm -f ${increment_file}
-   export "PGM=${execdir}/calc_increment_ncio.x ${fgfile} ${analfile} ${increment_file}"
-   #export DONT_USE_DPRES=1 # force recalculation of dpres increment from ps increment
-   #export DONT_USE_DELZ=1 # force recalculation of delz increment
-   nprocs=1 mpitaskspernode=1 ${scriptsdir}/runmpi
-   if [ $? -ne 0 -o ! -s ${increment_file} ]; then
-      echo "problem creating ${increment_file}, stopping .."
-      exit 1
-   fi
+      cat calc_increment_ncio.nml
+      echo "create ${increment_file}"
+      /bin/rm -f ${increment_file}
+      export "PGM=${execdir}/calc_increment_ncio.x ${fgfile} ${analfile} ${increment_file}"
+      #export DONT_USE_DPRES=1 # force recalculation of dpres increment from ps increment
+      #export DONT_USE_DELZ=1 # force recalculation of delz increment
+      nprocs=1 mpitaskspernode=1 ${scriptsdir}/runmpi
+      if [ $? -ne 0 -o ! -s ${increment_file} ]; then
+         echo "problem creating ${increment_file}, stopping .."
+         exit 1
+      fi
+   done
    cd ..
 else
    if [ $cold_start == "false" ] ; then
       cd INPUT
 # move already computed increment files
-      fh=$ANALINC
-      export increment_file="fv3_increment${fh}.nc"
-      /bin/mv -f ${datapath2}/incr_${analdate}_fhr0${fh}_${charnanal} ${increment_file}
+      for fh in $fhrs; do
+         export increment_file="fv3_increment${fh}.nc"
+         /bin/mv -f ${datapath2}/incr_${analdate}_fhr0${fh}_${charnanal} ${increment_file}
+      done
       cd ..
    fi
 fi
@@ -188,6 +191,10 @@ else
    if [ "${iau_delthrs}" != "-1" ]; then
       if [ "$iaufhrs" == "0.5" ]; then
          iau_inc_files="'fv3_increment1.nc'"
+      elif [ "$iaufhrs" == "0,3" ]; then
+         iau_inc_files="'fv3_increment6.nc','fv3_increment9.nc'"
+      elif [ "$iaufhrs" == "0,1,2,3" ]; then
+         iau_inc_files="'fv3_increment6.nc','fv3_increment7.nc','fv3_increment8.nc','fv3_increment9.nc'"
       else
          echo "illegal value for iaufhrs"
          exit 1
@@ -331,6 +338,12 @@ export timestep_hrs=`python -c "from __future__ import print_function; print($dt
 FHROT=0
 restart_interval="$RESTART_FREQ -1"
 output_1st_tstep_rst=".false."
+if [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ] && [ $ANALINC -eq 6 ] && [ "${iau_delthrs}" != "-1" ]; then
+   # cold start ICS at end of window, need one timestep restart
+   FHROT=3
+#   restart_interval=`python -c "from __future__ import print_function; print($FHROT + $timestep_hrs)"`
+   output_1st_tstep_rst=".true."
+fi
 
 cat > model_configure <<EOF
 print_esmf:              .true.
@@ -439,7 +452,7 @@ export DATOUT=${DATOUT:-$datapathp1}
 
 # this is a hack to work around the fact that first time step history
 # file is not written if restart file requested at first time step.
-if [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ]; then
+if [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ] && [ $ANALINC -eq 6 ]; then
    fh=3
    fh2=$[$fh+$FHOUT]
    charfhr2="f"`printf %03i $fh2`

@@ -102,12 +102,17 @@ done
 
 # compute forward obs operator for ps obs (create ncdiag files)
 # (psop_ncio)
+if [ $ANALINC -eq 1 ]; then
+   obsfile=${obs_datapath}/psobs1_${analdate}.txt
+elif [ $ANALINC -eq 6 ]; then
+   obsfile=${obs_datapath}/psobs_${analdate}.txt
+fi
 if [ $modelspace_vloc ==  ".true." ]; then # run on ens mean, save jacobian
    pushd ${datapath2}
    cat > psop.nml << EOF
 &nam_psop
   nlevt=${nlevt},fhmin=$FHMIN,fhmax=$FHMAX,fhout=${FHOUT},
-  datestring="${analdate}",obsfile="${obs_datapath}/psobs1_${analdate}.txt",zthresh=1000,ps_ind=128,
+  datestring="${analdate}",obsfile="${obsfile}",zthresh=1000,ps_ind=128,
 /
 EOF
    cat psop.nml
@@ -125,7 +130,7 @@ else # run on every member (and ensemble mean)
    cat > psop.nml << EOF
 &nam_psop
   nlevt=${nlevt},fhmin=$FHMIN,fhmax=$FHMAX,fhout=${FHOUT},nanals=${nanals},
-  datestring="${analdate}",obsfile="${obs_datapath}/psobs1_${analdate}.txt",zthresh=1000,
+  datestring="${analdate}",obsfile="${obsfile}",zthresh=1000,
 /
 EOF
    cat psop.nml

@@ -9,7 +9,7 @@ export LEVS=127
 export OCNRES="mx100"
 export ORES3=`echo $OCNRES | cut -c3-5`
 
-export exptname="C${RES}L${LEVS}ufs_psonlynoiau_gfsv16_hrly"
+export exptname="C${RES}L${LEVS}ufs_psonlyiau_gfsv16_hrly"
 
 export fg_gfs="run_ens_fv3.sh"
 export rungfs="run_fv3.sh"
@@ -217,23 +217,46 @@ else
 fi
 
 export nanals=80
-export ANALINC=1
 export RUN='gdas'
-export FHMIN=1
-export FHMAX=1
-export FHOUT=1
+export ANALINC=1 # can be 1 or 6
+export iaufhrs=$ANALINC
+if [ $ANALINC -eq 6 ]; then
+   export FHMIN=3
+   export FHMAX=9
+   export FHOUT=3
+   export iaufhrs="0,3"
+   export iau_delthrs=3
+elif [ $ANALINC -eq 1 ]; then
+# increment applied during subsequent 1-h forecast (window not centered on analysis time - starts at analysis time)
+# for 6-h cycling, apply IAU only to last half of window
+   export FHMIN=1
+   export FHMAX=1
+   export FHOUT=1
+   export iaufhrs="0.5"
+   export iau_delthrs=1
+else
+   echo "ANALINC must be 1 or 6"
+   exit 1
+fi
+export RESTART_FREQ=$iau_delthrs
+# IAU off
+#export iau_delthrs=-1
 export FHCYC=6
 export FRAC_GRID=.true.
-export RESTART_FREQ=1
 FHMAXP1=`expr $FHMAX + 1`
 export FHMAX_LONGER=`expr $FHMAX + $ANALINC`
 export enkfstatefhrs=`python -c "from __future__ import print_function; print(list(range(${FHMIN},${FHMAXP1},${FHOUT})))" | cut -f2 -d"[" | cut -f1 -d"]"`
-# increment applied during subsequent 1-h forecast (window not centered on analysis time - starts at analysis time)
-#export iaufhrs="0.5"
-#export iau_delthrs=1
-# IAU off
-export iaufhrs="1"
-export iau_delthrs=-1
+export analfhrs=$ANALINC
+if [ $ANALINC -eq 6 ]; then
+   if [ $iaufhrs == "0,3" ]; then 
+      export analfhrs="6,9"
+   elif [ $iaufhrs == "0,1,2,3" ]; then
+      export analfhrs="6,7,8,9"
+   else
+      echo "unsupported value for iaufhrs"
+      exit 1
+   fi
+fi
 
 export nitermax=2 # number of retries
 export scriptsdir="${basedir}/scripts/${exptname}"
