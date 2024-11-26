@@ -234,7 +234,7 @@ elif [ $ANALINC -eq 2 ]; then
    export iaufhrs=1,2,3
    export iau_delthrs="2" # iau_delthrs < 0 turns IAU off
 fi
-export FHCYC=1
+export FHCYC=$ANALINC
 export FRAC_GRID=.true.
 FHMAXP1=`expr $FHMAX + 1`
 export FHMAX_LONGER=`expr $FHMAX + $ANALINC`
