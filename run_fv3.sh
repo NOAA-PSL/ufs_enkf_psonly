@@ -410,10 +410,10 @@ if [ $NST_GSI -gt 0 ] && [ $FHCYC -gt 0 ]; then
 fi
 export timestep_hrs=`python -c "from __future__ import print_function; print($dt_atmos / 3600.)"`
 if [ "${iau_delthrs}" != "-1" ]  && [ "${cold_start}" == "false" ]; then
-   FHROT=1
+   FHROT=$FHOFFSET
 else
    if [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ]; then
-     FHROT=1
+     FHROT=$FHOFFSET
    else
      FHROT=0
    fi
