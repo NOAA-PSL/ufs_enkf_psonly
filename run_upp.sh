@@ -1,7 +1,7 @@
 #!/bin/sh
 ##SBATCH -q urgent
-#SBATCH -t 00:30:00
-#SBATCH -A gsd-fv3-dev
+#SBATCH -t 01:30:00
+#SBATCH -A gsienkf
 #SBATCH -N 1  
 #SBATCH --ntasks-per-node=80
 #SBATCH -p hercules
@@ -16,13 +16,14 @@ module load ${machine}
 module load wgrib2
 module list
 
-export exptname=C96L127ufs_psonlyiau_gfsv16
+export exptname=C96L127ufs_psonlyiau_gfsv16_2hrly
 export basedir=/work2/noaa/gsienkf/${USER}
 export scriptsdir="${basedir}/scripts/${exptname}"
 export execdir=${scriptsdir}/exec_${machine}
 
-analdate='2021090818'
-while [ $analdate -le '2021091500' ]; do
+ANALINC=2
+analdate='2021090100'
+while [ $analdate -le '2021090818' ]; do
 datapath=${basedir}/${exptname}
 YYYYMMDD=`echo $analdate | cut -c1-8`
 YYYY=`echo $analdate | cut -c1-4`
@@ -31,8 +32,8 @@ DD=`echo $analdate | cut -c7-8`
 HH=`echo $analdate | cut -c9-10`
 mkdir ${datapath}/postprd$$
 pushd ${datapath}/postprd$$
-filename_atm=${datapath}/${analdate}/sanl_${analdate}_fhr06_ensmean
-filename_sfc=${datapath}/${analdate}/bfg_${analdate}_fhr06_ensmean
+filename_atm=${datapath}/${analdate}/sanl_${analdate}_fhr0${ANALINC}_ensmean
+filename_sfc=${datapath}/${analdate}/bfg_${analdate}_fhr0${ANALINC}_ensmean
 /bin/cp -f ${scriptsdir}/upp_parm/* .
 sed -i -e "s/YYYY/${YYYY}/g" itag
 sed -i -e "s/MM/${MM}/g" itag

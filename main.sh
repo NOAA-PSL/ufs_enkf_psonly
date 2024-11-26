@@ -157,6 +157,15 @@ fi
 
 fi # skip to here if fg_only = true
 
+if [ $FHCYC -gt 0 ]; then
+   if [ $hr = "00" ] || [ $hr = "06" ] || [ $hr = "12" ] || [ $hr = "18" ]; then
+    echo "gcycle will be run with FHCYC=$FHCYC"
+   else
+    export FHCYC=0
+    echo "don't run gcycle"
+   fi
+fi
+
 echo "$analdate run enkf ens first guess `date`"
 sh ${scriptsdir}/run_fg_ens.sh > ${current_logdir}/run_fg_ens.out  2>&1
 ens_done=`cat ${current_logdir}/run_fg_ens.log`
