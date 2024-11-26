@@ -225,14 +225,14 @@ if [ $ANALINC -eq 6 ]; then
    export FHOUT=3
    export RESTART_FREQ=3
    export iaufhrs=3,6,9
-   export iau_delthrs="3" # iau_delthrs < 0 turns IAU off
+   export iau_delthrs="6" # iau_delthrs < 0 turns IAU off
 elif [ $ANALINC -eq 2 ]; then
    export FHMIN=1
    export FHMAX=3
    export FHOUT=1
    export RESTART_FREQ=1
    export iaufhrs=1,2,3
-   export iau_delthrs="1" # iau_delthrs < 0 turns IAU off
+   export iau_delthrs="2" # iau_delthrs < 0 turns IAU off
 fi
 export FHCYC=6
 export FRAC_GRID=.true.
