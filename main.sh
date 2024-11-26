@@ -107,7 +107,7 @@ if [ $modelspace_vloc ==  ".true." ]; then # run on ens mean, save jacobian
    cat > psop.nml << EOF
 &nam_psop
   nlevt=${nlevt},fhmin=$FHMIN,fhmax=$FHMAX,fhout=${FHOUT},
-  datestring="${analdate}",obsfile="${obs_datapath}/psobs_${analdate}.txt",zthresh=1000,ps_ind=128,
+  datestring="${analdate}",obsfile="${obs_datapath}/psobs${ANALINC}_${analdate}.txt",zthresh=1000,ps_ind=128,
 /
 EOF
    cat psop.nml
@@ -125,7 +125,7 @@ else # run on every member (and ensemble mean)
    cat > psop.nml << EOF
 &nam_psop
   nlevt=${nlevt},fhmin=$FHMIN,fhmax=$FHMAX,fhout=${FHOUT},nanals=${nanals},
-  datestring="${analdate}",obsfile="${obs_datapath}/psobs_${analdate}.txt",zthresh=1000,
+  datestring="${analdate}",obsfile="${obs_datapath}/psobs${ANALINC}_${analdate}.txt",zthresh=1000,
 /
 EOF
    cat psop.nml

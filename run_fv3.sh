@@ -36,7 +36,6 @@ export yearprev=`echo $analdatem1 |cut -c 1-4`
 export monprev=`echo $analdatem1 |cut -c 5-6`
 export dayprev=`echo $analdatem1 |cut -c 7-8`
 export hourprev=`echo $analdatem1 |cut -c 9-10`
-#analdatep1m3=`$incdate $analdatep1 -3`
 if [ "${iau_delthrs}" != "-1" ] && [ "${cold_start}" == "false" ]; then
 # assume model is started at beginning of analysis window
 # (if IAU on or initial cold start)
@@ -220,7 +219,7 @@ if [ "$cold_start" == "true" ] || [ $skip_iau == "true" ] ; then
       externalic=F
       mountain=T
       iaudelthrs=-1
-      iaufhrs=6
+      iaufhrs=${ANALINC}
       iau_inc_files=""
    else
       warm_start=F
@@ -249,8 +248,12 @@ else
          iau_inc_files="'fv3_increment3.nc','fv3_increment4.nc','fv3_increment5.nc','fv3_increment6.nc','fv3_increment7.nc','fv3_increment8.nc','fv3_increment9.nc'"
       elif [ "$iaufhrs" == "3,6,9" ]; then
          iau_inc_files="'fv3_increment3.nc','fv3_increment6.nc','fv3_increment9.nc'"
+      elif [ "$iaufhrs" == "1,2,3" ]; then
+         iau_inc_files="'fv3_increment1.nc','fv3_increment2.nc','fv3_increment3.nc'"
       elif [ "$iaufhrs" == "6" ]; then
          iau_inc_files="'fv3_increment6.nc'"
+      elif [ "$iaufhrs" == "2" ]; then
+         iau_inc_files="'fv3_increment2.nc'"
       else
          echo "illegal value for iaufhrs"
          exit 1
@@ -258,7 +261,7 @@ else
       reslatlondynamics=""
       readincrement=F
    else
-      reslatlondynamics="fv3_increment6.nc"
+      reslatlondynamics="fv3_increment${ANALINC}.nc"
       readincrement=T
       iau_inc_files=""
    fi
@@ -407,10 +410,10 @@ if [ $NST_GSI -gt 0 ] && [ $FHCYC -gt 0 ]; then
 fi
 export timestep_hrs=`python -c "from __future__ import print_function; print($dt_atmos / 3600.)"`
 if [ "${iau_delthrs}" != "-1" ]  && [ "${cold_start}" == "false" ]; then
-   FHROT=3
+   FHROT=1
 else
    if [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ]; then
-     FHROT=3
+     FHROT=1
    else
      FHROT=0
    fi
@@ -538,16 +541,16 @@ export DATOUT=${DATOUT:-$datapathp1}
 # this is a hack to work around the fact that first time step history
 # file is not written if restart file requested at first time step.
 if [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ]; then
-   fh=3
+   fh=$FHOFFSET
    fh2=$[$fh+$FHOUT]
    charfhr2="f"`printf %03i $fh2`
-   if [ ! -s  dynf003.nc ]; then
-     echo "dynf003.nc missing, copy dyn${charfhr2}"
-     /bin/cp -f dyn${charfhr2}.nc dynf003.nc
+   if [ ! -s  dynf00${FHOFFSET}.nc ]; then
+     echo "dynf00${FHOFFSET}.nc missing, copy dyn${charfhr2}"
+     /bin/cp -f dyn${charfhr2}.nc dynf00${FHOFFSET}.nc
    fi
-   if [ ! -s  phyf003.nc ]; then
-     echo "phyf003.nc missing, copy phy${charfhr2}"
-     /bin/cp -f phy${charfhr2}.nc phyf003.nc
+   if [ ! -s  phyf00${FHOFFSET}.nc ]; then
+     echo "phyf00${FHOFFSET}.nc missing, copy phy${charfhr2}"
+     /bin/cp -f phy${charfhr2}.nc phyf00${FHOFFSET}.nc
    fi
 fi
 # rename netcdf history files.
