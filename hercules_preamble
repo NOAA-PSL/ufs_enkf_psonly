@@ -16,7 +16,7 @@ export machine='hercules'
 
 export fg_proc=$corespernode
 export fg_threads=1 
-export enkf_threads=1
+export enkf_threads=10
 export write_groups=1
 export write_tasks=8 
 export layout="3, 4"
