@@ -36,6 +36,7 @@ export yearprev=`echo $analdatem1 |cut -c 1-4`
 export monprev=`echo $analdatem1 |cut -c 5-6`
 export dayprev=`echo $analdatem1 |cut -c 7-8`
 export hourprev=`echo $analdatem1 |cut -c 9-10`
+export minnext='00'
 if [ "${iau_delthrs}" != "-1" ] && [ "${cold_start}" == "false" ]; then
 # assume model is started at beginning of analysis window
 # (if IAU on or initial cold start)
@@ -49,11 +50,17 @@ if [ "${iau_delthrs}" != "-1" ] && [ "${cold_start}" == "false" ]; then
    export mon_start=`echo $analdatem3 |cut -c 5-6`
    export day_start=`echo $analdatem3 |cut -c 7-8`
    export hour_start=`echo $analdatem3 |cut -c 9-10`
+   if [ $ANALINC -eq 1 ]; then
+      export min_start=`echo $analdatem3 |cut -c 11-12`
+   fi
    # end time of analysis window (time for next restart)
    export yrnext=`echo $analdatep1m3 |cut -c 1-4`
    export monnext=`echo $analdatep1m3 |cut -c 5-6`
    export daynext=`echo $analdatep1m3 |cut -c 7-8`
    export hrnext=`echo $analdatep1m3 |cut -c 9-10`
+   if [ $ANALINC -eq 1 ]; then
+      export minnext=`echo $analdatep1m3 |cut -c 11-12`
+   fi
 else
    # if no IAU, start date is middle of window
    export year=`echo $analdate |cut -c 1-4`
@@ -69,6 +76,11 @@ else
    export monp3=`echo $analdatep1m3 |cut -c 5-6`
    export dayp3=`echo $analdatep1m3 |cut -c 7-8`
    export hrp3=`echo $analdatep1m3 |cut -c 9-10`
+   if [ $ANALINC -eq 1 ]; then
+      export minp3=`echo $analdatep1m3 |cut -c 11-12`
+   else
+      export minp3='00'
+   fi
    # time for restart file
    if [ "${iau_delthrs}" != "-1" ] ; then
       # beginning of next analysis window
@@ -76,6 +88,7 @@ else
       export monnext=$monp3
       export daynext=$dayp3
       export hrnext=$hrp3
+      export minnext=$minp3
    else
       # end of next analysis window
       export yrnext=`echo $analdatep1 |cut -c 1-4`
@@ -254,6 +267,8 @@ else
          iau_inc_files="'fv3_increment6.nc'"
       elif [ "$iaufhrs" == "2" ]; then
          iau_inc_files="'fv3_increment2.nc'"
+      elif [ "$iaufhrs" == "1" ]; then
+         iau_inc_files="'fv3_increment1.nc'"
       else
          echo "illegal value for iaufhrs"
          exit 1
@@ -315,36 +330,13 @@ fi
 
 ls -l 
 
-if [ $nanals2 -gt 0 ] && [ $nmem -le $nanals2 ]; then
-   longer_fcst="YES"
-   # if longfcst_singletime=0, FHMAX_LONGER is divisible by 6, and only a single forecast time
-   # (the end of the forecast) beyond FHMAX is saved.  If longfcst_singletime=3, then it is 
-   # assumed that all the times in the 6-h window centered on FHMAX_LONGER - 3 are desired so
-   # that the GSI observer can be run.
-   longfcst_singletime=`python -c "from __future__ import print_function; print($FHMAX_LONGER % 6)"`
-   echo "longfcst_singletime=$longfcst_singletime"
-else
-   longer_fcst="NO"
-fi
 if [ "${iau_delthrs}" != "-1" ]; then
-   if [ $longer_fcst = "YES" ]; then
-      FHMAX_FCST=`expr $FHMAX_LONGER + $ANALINC`
-   else
-      FHMAX_FCST=`expr $FHMAX + $ANALINC`
-   fi
+   FHMAX_FCST=`expr $FHMAX + $ANALINC`
    if [ ${cold_start} = "true" ]; then
-      if [ $longer_fcst = "YES" ]; then
-         FHMAX_FCST=$FHMAX_LONGER
-      else
-         FHMAX_FCST=$FHMAX
-      fi
-   fi
-else
-   if [ $longer_fcst = "YES" ]; then
-      FHMAX_FCST=$FHMAX_LONGER
-   else
       FHMAX_FCST=$FHMAX
    fi
+else
+   FHMAX_FCST=$FHMAX
 fi
 
 #if [ $FHCYC -gt 0 ]; then
@@ -412,19 +404,23 @@ export timestep_hrs=`python -c "from __future__ import print_function; print($dt
 if [ "${iau_delthrs}" != "-1" ]  && [ "${cold_start}" == "false" ]; then
    FHROT=$FHOFFSET
 else
-   if [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ]; then
+   if [ $ANALINC -eq 6 ] && [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ]; then
      FHROT=$FHOFFSET
    else
      FHROT=0
    fi
 fi
-if [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ] && [ "${iau_delthrs}" != "-1" ]; then
+if [ $ANALINC -eq 6 ] && [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ] && [ "${iau_delthrs}" != "-1" ]; then
    # cold start ICS at end of window, need one timestep restart
    restart_interval=`python -c "from __future__ import print_function; print($FHROT + $timestep_hrs)"`
    output_1st_tstep_rst=".true."
 else
    restart_interval="$RESTART_FREQ -1"
    output_1st_tstep_rst=".false."
+fi
+
+if [ $ANALINC -eq 1 ]; then
+   restart_interval=$RESTART_FREQ
 fi
 
 if [ $skip_iau == "true" ]; then
@@ -540,7 +536,7 @@ export DATOUT=${DATOUT:-$datapathp1}
 
 # this is a hack to work around the fact that first time step history
 # file is not written if restart file requested at first time step.
-if [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ]; then
+if [ $ANALINC -eq 6 ] && [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ]; then
    fh=$FHOFFSET
    fh2=$[$fh+$FHOUT]
    charfhr2="f"`printf %03i $fh2`
@@ -560,60 +556,18 @@ fh=$FHMIN
 while [ $fh -le $FHMAX ]; do
   charfhr="fhr"`printf %02i $fh`
   charfhr2="f"`printf %03i $fh`
-  if [ $longer_fcst = "YES" ] && [ $fh -eq $FHMAX ] && [ $longfcst_singletime -gt 0 ]; then
-     # copy file, it will be duplicated as sfg2
-     /bin/cp -f dyn${charfhr2}.nc ${DATOUT}/sfg_${analdatep1}_${charfhr}_${charnanal}
-  else
-     /bin/mv -f dyn${charfhr2}.nc ${DATOUT}/sfg_${analdatep1}_${charfhr}_${charnanal}
-  fi
+  /bin/mv -f dyn${charfhr2}.nc ${DATOUT}/sfg_${analdatep1}_${charfhr}_${charnanal}
   if [ $? -ne 0 ]; then
      echo "netcdffile missing..."
      exit 1
   fi
-  if [ $longer_fcst = "YES" ] && [ $fh -eq $FHMAX ] && [ $longfcst_singletime -gt 0 ]; then
-     # copy file, it will be duplicated as bfg2
-     /bin/cp -f phy${charfhr2}.nc ${DATOUT}/bfg_${analdatep1}_${charfhr}_${charnanal}
-  else
-     /bin/mv -f phy${charfhr2}.nc ${DATOUT}/bfg_${analdatep1}_${charfhr}_${charnanal}
-  fi
+  /bin/mv -f phy${charfhr2}.nc ${DATOUT}/bfg_${analdatep1}_${charfhr}_${charnanal}
   if [ $? -ne 0 ]; then
      echo "netcdf file missing..."
      exit 1
   fi
   fh=$[$fh+$FHOUT]
 done
-if [ $longer_fcst = "YES" ]; then
-    if [ $longfcst_singletime -eq 0 ]; then
-       # save just the last file (to compare with IFS analysis in grid space, no time interp
-       # needed for GSI observer)
-       analdatep2=`$incdate $analdate $FHMAX_LONGER`
-       mkdir -p $datapath/$analdatep2
-       charfhr="fhr"`printf %02i $FHMAX_LONGER`
-       charfhr2="f"`printf %03i $FHMAX_LONGER`
-       /bin/mv -f dyn${charfhr2}.nc ${datapath}/${analdatep2}/sfg2_${analdatep2}_${charfhr}_${charnanal}
-       /bin/mv -f phy${charfhr2}.nc ${datapath}/${analdatep2}/bfg2_${analdatep2}_${charfhr}_${charnanal}
-    else
-       fh=`expr $FHMAX_LONGER - $ANALINC`
-       fhmax2=`expr $FHMAX_LONGER - $ANALINC \/ 2`
-       analdatep2=`$incdate $analdate $fhmax2`
-       mkdir -p $datapath/$analdatep2
-       while [ $fh -le $FHMAX_LONGER ]; do
-         charfhr="fhr"`printf %02i $fh`
-         charfhr2="f"`printf %03i $fh`
-         /bin/mv -f dyn${charfhr2}.nc ${datapath}/${analdatep2}/sfg2_${analdatep2}_${charfhr}_${charnanal}
-         if [ $? -ne 0 ]; then
-            echo "netcdffile missing..."
-            exit 1
-         fi
-         /bin/mv -f phy${charfhr2}.nc ${datapath}/${analdatep2}/bfg2_${analdatep2}_${charfhr}_${charnanal}
-         if [ $? -ne 0 ]; then
-            echo "netcdf file missing..."
-            exit 1
-         fi
-         fh=$[$fh+$FHOUT]
-       done
-    fi
-fi
 /bin/rm -f phy*nc dyn*nc
 
 ls -l *tile*nc
@@ -624,7 +578,7 @@ if [ -z $dont_copy_restart ]; then # if dont_copy_restart not set, do this
    mkdir -p ${datapathp1}/${charnanal}/INPUT
    cd RESTART
    ls -l
-   datestring="${yrnext}${monnext}${daynext}.${hrnext}"
+   datestring="${yrnext}${monnext}${daynext}.${hrnext}${minnext}"
    for file in ${datestring}*nc; do
       file2=`echo $file | cut -f3-10 -d"."`
       /bin/mv -f $file ${datapathp1}/${charnanal}/INPUT/$file2

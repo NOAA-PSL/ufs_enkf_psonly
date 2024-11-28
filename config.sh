@@ -9,7 +9,7 @@ export LEVS=127
 export OCNRES="mx100"
 export ORES3=`echo $OCNRES | cut -c3-5`
 
-export exptname="C${RES}L${LEVS}ufs_psonlyiau_gfsv16_2hrly"
+export exptname="C${RES}L${LEVS}ufs_psonlyiau_gfsv16_hrly"
 
 export fg_gfs="run_ens_fv3.sh"
 export rungfs="run_fv3.sh"
@@ -217,7 +217,7 @@ else
 fi
 
 export nanals=80
-export ANALINC=2
+export ANALINC=1
 export RUN='gdas'
 if [ $ANALINC -eq 6 ]; then
    export FHMIN=3
@@ -233,11 +233,17 @@ elif [ $ANALINC -eq 2 ]; then
    export RESTART_FREQ=1
    export iaufhrs=1,2,3
    export iau_delthrs="2" # iau_delthrs < 0 turns IAU off
+elif [ $ANALINC -eq 1 ]; then
+   export FHMIN=1
+   export FHMAX=1
+   export FHOUT=1
+   export RESTART_FREQ=0.5
+   export iaufhrs=1
+   export iau_delthrs="1" # iau_delthrs < 0 turns IAU off
 fi
 export FHCYC=$ANALINC
 export FRAC_GRID=.true.
 FHMAXP1=`expr $FHMAX + 1`
-export FHMAX_LONGER=`expr $FHMAX + $ANALINC`
 export enkfstatefhrs=`python -c "from __future__ import print_function; print(list(range(${FHMIN},${FHMAXP1},${FHOUT})))" | cut -f2 -d"[" | cut -f1 -d"]"`
 # IAU off
 #export iaufhrs=$ANALINC
@@ -247,6 +253,7 @@ export nitermax=1 # number of retries
 export scriptsdir="${basedir}/scripts/${exptname}"
 export homedir=$scriptsdir
 export incdate="${scriptsdir}/incdate.sh"
+export incdate2="${scriptsdir}/incdate2.sh"
 
 # enkf parameters
 export write_ensmean=.true.

@@ -109,8 +109,8 @@
   pre_rad        = F
   imp_physics    = 11
   pdfcld         = F
-  fhswr          = 3600.
-  fhlwr          = 3600.
+  fhswr          = 1800.
+  fhlwr          = 1800.
   ialb           = 1
   iems           = 1
   IAER           = 5111
