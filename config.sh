@@ -9,7 +9,7 @@ export LEVS=127
 export OCNRES="mx100"
 export ORES3=`echo $OCNRES | cut -c3-5`
 
-export exptname="C${RES}L${LEVS}ufs_psonlyiau_gfsv16_hrly"
+export exptname="C${RES}L${LEVS}ufs_psonlyiau_gfsv16_2hrly"
 
 export fg_gfs="run_ens_fv3.sh"
 export rungfs="run_fv3.sh"
@@ -217,28 +217,30 @@ else
 fi
 
 export nanals=80
-export ANALINC=1
+export ANALINC=2
 export RUN='gdas'
+# allowed cycling intervals are 6,2 and 1 hours.
+# 3 doesn't work well because history files would be needed at 
+# non-integer forecast hours and doesn't fit nicely in 6-h dump window.
 if [ $ANALINC -eq 6 ]; then
    export FHMIN=3
    export FHMAX=6
    export FHOUT=3
-   export RESTART_FREQ=3
    export iaufhrs=3,6,9
+   #export FHOUT=1
+   #export iaufhrs=3,4,5,6,7,8,9
    export iau_delthrs="6" # iau_delthrs < 0 turns IAU off
 elif [ $ANALINC -eq 2 ]; then
    export FHMIN=1
    export FHMAX=3
    export FHOUT=1
-   export RESTART_FREQ=1
-   export iaufhrs=1,2,3
-   export iau_delthrs="2" # iau_delthrs < 0 turns IAU off
+   export iaufhrs=1,2,3 
+   export iau_delthrs="2" 
 elif [ $ANALINC -eq 1 ]; then
    export FHMIN=1
    export FHMAX=1
    export FHOUT=1
-   export RESTART_FREQ=0.5
-   export iaufhrs=1
+   export iaufhrs=1 # only a single forecast background
    export iau_delthrs="1" # iau_delthrs < 0 turns IAU off
 fi
 export FHCYC=$ANALINC

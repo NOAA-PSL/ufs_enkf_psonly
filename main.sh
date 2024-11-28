@@ -22,12 +22,15 @@ export yr=`echo $analdate | cut -c1-4`
 export mon=`echo $analdate | cut -c5-6`
 export day=`echo $analdate | cut -c7-8`
 export hr=`echo $analdate | cut -c9-10`
-# previous analysis time.
+# FHOFFSET is offset of restart time from center of window when IAU is used
+# (half of ANALINC)
+#export FHOFFSET=`python -c "print(${ANALINC}/2)"`
 if [ $ANALINC -eq 1 ]; then
    export FHOFFSET=0.5
 else
    export FHOFFSET=`expr $ANALINC \/ 2`
 fi
+# previous analysis time.
 export analdatem1=`${incdate} $analdate -$ANALINC`
 # next analysis time.
 export analdatep1=`${incdate} $analdate $ANALINC`
