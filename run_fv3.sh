@@ -412,7 +412,7 @@ else
 fi
 if [ $ANALINC -eq 6 ] && [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ] && [ "${iau_delthrs}" != "-1" ]; then
    # cold start ICS at end of window, need one timestep restart
-   restart_interval=`python -c "from __future__ import print_function; print($timestep_hrs)"`
+   restart_interval=`python -c "from __future__ import print_function; print($FHROT + $timestep_hrs)"`
    output_1st_tstep_rst=".true."
 else
    if [ "${iau_delthrs}" != "-1" ]; then
@@ -578,7 +578,11 @@ if [ -z $dont_copy_restart ]; then # if dont_copy_restart not set, do this
    mkdir -p ${datapathp1}/${charnanal}/INPUT
    cd RESTART
    ls -l
-   datestring="${yrnext}${monnext}${daynext}.${hrnext}${minnext}"
+   if [ $minnext -ne '00' ]; then
+      datestring="${yrnext}${monnext}${daynext}.${hrnext}${minnext}"
+   else
+      datestring="${yrnext}${monnext}${daynext}.${hrnext}"
+   fi
    for file in ${datestring}*nc; do
       file2=`echo $file | cut -f3-10 -d"."`
       /bin/mv -f $file ${datapathp1}/${charnanal}/INPUT/$file2
