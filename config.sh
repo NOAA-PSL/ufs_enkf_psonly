@@ -9,7 +9,7 @@ export LEVS=127
 export OCNRES="mx100"
 export ORES3=`echo $OCNRES | cut -c3-5`
 
-export exptname="C${RES}L${LEVS}ufs_psonlyiau_gfsv16"
+export exptname="C${RES}L${LEVS}ufs_psonly_gfsv17"
 
 export fg_gfs="run_ens_fv3.sh"
 export rungfs="run_fv3.sh"
@@ -175,7 +175,7 @@ export NST_GSI=0          # default 0: No NST info at all;
 
 if [ $NST_GSI -gt 0 ]; then export NSTINFO=4; fi
 
-export SUITE="FV3_GFS_v16"
+export SUITE="FV3_GFS_v17_p8_ugwpv1"
 
 # stochastic physics parameters.
 export DO_SPPT=T
@@ -206,7 +206,7 @@ elif [ $RES -eq 192 ]; then
    export LONB=768  
    export LATB=384
 elif [ $RES -eq 96 ]; then
-   export dt_atmos=300
+   export dt_atmos=600
    export cdmbgwd="0.14,1.8,1.0,1.0"  # mountain blocking, ogwd, cgwd, cgwd src scaling
    export JCAP=190
    export LONB=384  
@@ -230,9 +230,6 @@ export FHMAX_LONGER=`expr $FHMAX + $ANALINC`
 export enkfstatefhrs=`python -c "from __future__ import print_function; print(list(range(${FHMIN},${FHMAXP1},${FHOUT})))" | cut -f2 -d"[" | cut -f1 -d"]"`
 export iaufhrs=3,6,9
 export iau_delthrs="6" # iau_delthrs < 0 turns IAU off
-# IAU off
-#export iaufhrs="6"
-#export iau_delthrs=-1
 
 export nitermax=2 # number of retries
 export scriptsdir="${basedir}/scripts/${exptname}"
@@ -325,9 +322,11 @@ if [ "$machine" == 'hera' ]; then
    export gsiexec=${execdir}/gsi.x
 elif [ "$machine" == 'orion' ] || [ $machine == "hercules" ]; then
    export python=`which python`
-   export fv3gfspath=/work/noaa/global/glopara/fix_NEW
-   export FIXDIR=/work/noaa/nems/emc.nemspara/RT/NEMSfv3gfs/input-data-20220414
-   export FIXDIR_gcyc=${fv3gfspath}
+   export FIXDIR=/work/noaa/gsienkf/whitaker/global-workflow/fix
+   export FIXDIR_gcyc=$FIXDIR
+   #export fv3gfspath=/work/noaa/global/glopara/fix_NEW
+   #export FIXDIR=/work/noaa/nems/emc.nemspara/RT/NEMSfv3gfs/input-data-20220414
+   #export FIXDIR_gcyc=${fv3gfspath}
    export FIXFV3=${fv3gfspath}/fix_fv3_gmted2010
    export FIXGLOBAL=${fv3gfspath}/fix_am
    export gsipath=/work/noaa/gsienkf/whitaker/GSI

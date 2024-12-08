@@ -22,6 +22,7 @@ charnanal2=`printf %02i $nmem`
 export ISEED_SPPT=$((analdate*1000 + nmem*10 + 0 + niter))
 export ISEED_SKEB=$((analdate*1000 + nmem*10 + 1 + niter))
 export ISEED_SHUM=$((analdate*1000 + nmem*10 + 2 + niter))
+export ISEED_CA=$((analdate+nmem))
 #export ISEED_SPPT=$((analdate*1000 + nmem*10 + 0))
 #export ISEED_SKEB=$((analdate*1000 + nmem*10 + 1))
 #export ISEED_SHUM=$((analdate*1000 + nmem*10 + 2))
@@ -116,35 +117,115 @@ if [ "$cold_start" == "true" ]; then
        ln -fs $file $file2
    done
 fi
+cd ..
 
 # Grid and orography data
-n=1
-while [ $n -le 6 ]; do
- ln -fs $FIXFV3/C${RES}/C${RES}_grid.tile${n}.nc     C${RES}_grid.tile${n}.nc
- ln -fs $FIXFV3/C${RES}/C${RES}_oro_data.tile${n}.nc oro_data.tile${n}.nc
- n=$((n+1))
+#n=1
+#if [[ $RES -eq 96 ]]; then
+#   fv3_input_data=FV3_input_data
+#else
+#   fv3_input_data=FV3_input_data${RES}
+#fi
+#while [ $n -le 6 ]; do
+# ln -fs $FIXDIR/${fv3_input_data}/INPUT_L127/C${RES}_grid.tile${n}.nc C${RES}_grid.tile${n}.nc
+# if [ $FRAC_GRID == ".true." ]; then
+#    ln -fs $FIXDIR/FV3_fix_tiled/C${RES}/oro_C${RES}.${OCNRES}.tile${n}.nc oro_data.tile${n}.nc
+# else
+#    ln -fs $FIXDIR/${fv3_input_data}/INPUT_L127/oro_data.tile${n}.nc oro_data.tile${n}.nc
+# fi
+# ln -fs $FIXDIR/${fv3_input_data}/INPUT_L127/oro_data_ls.tile${n}.nc oro_data_ls.tile${n}.nc
+# ln -fs $FIXDIR/${fv3_input_data}/INPUT_L127/oro_data_ss.tile${n}.nc oro_data_ss.tile${n}.nc
+# n=$((n+1))
+#done
+#if [ $FRAC_GRID == ".true." ]; then
+#ln -fs $FIXDIR/${fv3_input_data}/INPUT/grid_spec.nc  C${RES}_mosaic.nc
+#ln -fs $FIXDIR/CPL_FIX/aC${RES}o${ORES3}/grid_spec.nc  grid_spec.nc
+#ln -fs $FIXDIR/MOM6_FIX/${ORES3}/ocean_mosaic.nc ocean_mosaic.nc
+#else
+#ln -fs $FIXDIR/${fv3_input_data}/INPUT/grid_spec.nc  grid_spec.nc
+#fi
+## symlinks one level up from INPUT
+#cd ..
+#/bin/cp -f $scriptsdir/noahmptable.tbl .
+##ln -fs $FIXDIR/FV3_fix/fix_co2_proj/* .
+##ln -fs /lustre/f2/dev/Jeffrey.S.Whitaker/fix_NEW/fix_am/co2dat_4a/* .
+#export CO2DIR=${CO2DIR:-$FIXDIR/FV3_fix/fix_co2_proj}
+#ln -fs $CO2DIR/* .
+##ln -fs $FIXDIR/FV3_fix/*grb .
+#ln -fs $FIXDIR/FV3_fix/*txt .
+#ln -fs $FIXDIR/FV3_fix/*f77 .
+#ln -fs $FIXDIR/FV3_fix/*dat .
+#ln -fs $FIXDIR/FV3_input_data_RRTMGP/* .
+#ln -fs $FIXDIR/FV3_input_data_gsd/CCN_ACTIVATE.BIN CCN_ACTIVATE.BIN 
+#ln -fs $FIXDIR/FV3_input_data_gsd/freezeH2O.dat freezeH2O.dat   
+#ln -fs $FIXDIR/FV3_input_data_gsd/qr_acr_qg.dat qr_acr_qg.dat
+#ln -fs $FIXDIR/FV3_input_data_gsd/qr_acr_qs.dat qr_acr_qs.dat 
+#ln -fs $FIXDIR/FV3_input_data/ugwp_C384_tau.nc ugwp_limb_tau.nc
+## for ugwpv1 and MERRA aerosol climo (IAER=1011)
+#for n in 01 02 03 04 05 06 07 08 09 10 11 12; do
+#  ln -fs $FIXDIR/FV3_input_data_INCCN_aeroclim/MERRA2/merra2.aerclim.2003-2014.m${n}.nc aeroclim.m${n}.nc
+#done
+#ln -fs  $FIXDIR/FV3_input_data_INCCN_aeroclim/aer_data/LUTS/optics_BC.v1_3.dat  optics_BC.dat
+#ln -fs  $FIXDIR/FV3_input_data_INCCN_aeroclim/aer_data/LUTS/optics_OC.v1_3.dat  optics_OC.dat
+#ln -fs  $FIXDIR/FV3_input_data_INCCN_aeroclim/aer_data/LUTS/optics_DU.v15_3.dat optics_DU.dat
+#ln -fs  $FIXDIR/FV3_input_data_INCCN_aeroclim/aer_data/LUTS/optics_SS.v3_3.dat  optics_SS.dat
+#ln -fs  $FIXDIR/FV3_input_data_INCCN_aeroclim/aer_data/LUTS/optics_SU.v1_3.dat  optics_SU.dat
+
+# Grid and orography data
+CASE=C${RES}
+FIXgfs=$FIXDIR
+FIXorog=${FIXgfs}/orog
+FIXugwd=${FIXgfs}/ugwd
+ln -fs "${FIXorog}/${CASE}/${CASE}_mosaic.nc" INPUT/grid_spec.nc
+# Files for GWD
+ln -fs "${FIXugwd}/ugwp_limb_tau.nc" ugwp_limb_tau.nc
+# Files for orography, GWD tiles
+local tt
+for (( tt = 1; tt <= 6; tt++ )); do
+  ln -fs "${FIXorog}/${CASE}/${CASE}.${OCNRES}_oro_data.tile${tt}.nc" INPUT/oro_data.tile${tt}.nc
+  ln -fs "${FIXorog}/${CASE}/${CASE}_grid.tile${tt}.nc"                 INPUT/${CASE}_grid.tile${tt}.nc
+  ln -fs "${FIXugwd}/${CASE}/${CASE}_oro_data_ls.tile${tt}.nc"          INPUT/oro_data_ls.tile${tt}.nc
+  ln -fs "${FIXugwd}/${CASE}/${CASE}_oro_data_ss.tile${tt}.nc"          INPUT/oro_data_ss.tile${tt}.nc
 done
-ln -fs $FIXFV3/C${RES}/C${RES}_mosaic.nc  grid_spec.nc
-cd ..
-#ln -fs $FIXGLOBAL/global_o3prdlos.f77               global_o3prdlos.f77
-# new ozone and h2o physics for stratosphere
-ln -fs $FIXGLOBAL/ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77 global_o3prdlos.f77
-ln -fs $FIXGLOBAL/global_h2o_pltc.f77 global_h2oprdlos.f77 # used if h2o_phys=T
-# co2, ozone, surface emiss and aerosol data.
-ln -fs $FIXGLOBAL/global_solarconstant_noaa_an.txt  solarconstant_noaa_an.txt
-ln -fs $FIXGLOBAL/global_sfc_emissivity_idx.txt     sfc_emissivity_idx.txt
-ln -fs $FIXGLOBAL/global_co2historicaldata_glob.txt co2historicaldata_glob.txt
-ln -fs $FIXGLOBAL/co2monthlycyc.txt                 co2monthlycyc.txt
-for file in `ls $FIXGLOBAL/co2dat_4a/global_co2historicaldata* ` ; do
-   ln -fs $file $(echo $(basename $file) |sed -e "s/global_//g")
+# NoahMP table
+/bin/cp -f $scriptsdir/noahmptable.tbl .
+#  Thompson microphysics fix files
+ln -fs "${FIXgfs}/am/CCN_ACTIVATE.BIN" CCN_ACTIVATE.BIN
+ln -fs "${FIXgfs}/am/freezeH2O.dat"    freezeH2O.dat
+ln -fs "${FIXgfs}/am/qr_acr_qgV2.dat"  qr_acr_qgV2.dat
+ln -fs "${FIXgfs}/am/qr_acr_qsV2.dat"  qr_acr_qsV2.dat
+# stratospheric ozone and water vapor
+O3FORC="ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77"
+#O3FORC="global_o3prdlos.f77"
+H2OFORC="global_h2o_pltc.f77"
+ln -fs "${FIXgfs}/am/${O3FORC}"  global_o3prdlos.f77
+ln -fs "${FIXgfs}/am/${H2OFORC}" global_h2oprdlos.f77
+# GFS standard input data
+ln -fs "${FIXgfs}/am/global_solarconstant_noaa_an.txt" solarconstant_noaa_an.txt
+ln -fs "${FIXgfs}/am/global_sfc_emissivity_idx.txt"    sfc_emissivity_idx.txt
+## merra2 aerosol climo
+local month mm
+for (( month = 1; month <=12; month++ )); do
+  mm=$(printf %02d "${month}")
+  ln -fs "${FIXgfs}/aer/merra2.aerclim.2014-2023.m${mm}.nc" aeroclim.m${mm}.nc
 done
-ln -fs $FIXGLOBAL/global_climaeropac_global.txt     aerosol.dat
-for file in `ls $FIXGLOBAL/global_volcanic_aerosols* ` ; do
-   ln -fs $file $(echo $(basename $file) |sed -e "s/global_//g")
+ln -fs "${FIXgfs}/am/global_climaeropac_global.txt" aerosol.dat
+local file
+for file in "${FIXgfs}/am/global_volcanic_aerosols"* ; do
+  ln -fs "${file}" $(basename "${file//global_}")
 done
-# for Thompson microphysics
-#ln -fs $FIXGLOBAL/CCN_ACTIVATE.BIN CCN_ACTIVATE.BIN
-#ln -fs $FIXGLOBAL/freezeH2O.dat freezeH2O.dat
+ln -fs "${FIXgfs}/lut/optics_BC.v1_3.dat"  optics_BC.dat
+ln -fs "${FIXgfs}/lut/optics_OC.v1_3.dat"  optics_OC.dat
+ln -fs "${FIXgfs}/lut/optics_DU.v15_3.dat" optics_DU.dat
+ln -fs "${FIXgfs}/lut/optics_SS.v3_3.dat"  optics_SS.dat
+ln -fs "${FIXgfs}/lut/optics_SU.v1_3.dat"  optics_SU.dat
+ln -fs "${FIXgfs}/am/global_co2historicaldata_glob.txt" co2historicaldata_glob.txt
+ln -fs "${FIXgfs}/am/co2monthlycyc.txt"                 co2monthlycyc.txt
+co2dir="co2dat_4a"
+local file
+for file in "${FIXgfs}/am/${co2dir}/global_co2historicaldata"* ; do
+  ln -fs "${file}" $(basename "${file//global_}")
+done
 
 # create netcdf increment files.
 if [ "$cold_start" == "false" ] && [ -z $skip_calc_increment ]; then
@@ -211,7 +292,7 @@ fi
 if [ "$cold_start" == "true" ] || [ $skip_iau == "true" ] ; then
    # cold start from chgres'd GFS analyes
    stochini=F
-   reslatlondynamics=""
+   reslatlondynamics="\"\""
    readincrement=F
    #iau_inc_files="fv3_increment.nc"
    iau_inc_files=""
@@ -255,12 +336,12 @@ else
          echo "illegal value for iaufhrs"
          exit 1
       fi
-      reslatlondynamics=""
+      reslatlondynamics="\"\""
       readincrement=F
    else
       reslatlondynamics="fv3_increment6.nc"
       readincrement=T
-      iau_inc_files=""
+      iau_inc_files="\"\""
    fi
 fi
 
@@ -485,6 +566,8 @@ sed -i -e "s/LAYOUT/${layout}/g" input.nml
 sed -i -e "s/NSTFNAME/${nstf_name}/g" input.nml
 sed -i -e "s/NPX/${npx}/g" input.nml
 sed -i -e "s/NPY/${npx}/g" input.nml
+sed -i -e "s/CRES/C${RES}/g" input.nml
+sed -i -e "s/OCNRES/${OCNRES}/g" input.nml
 sed -i -e "s/LEVP/${LEVP}/g" input.nml
 sed -i -e "s/LEVS/${LEVS}/g" input.nml
 sed -i -e "s/LONB/${LONB}/g" input.nml
@@ -502,6 +585,7 @@ sed -i -e "s/CDMBGWD/${cdmbgwd}/g" input.nml
 sed -i -e "s/ISEED_sppt/${ISEED_SPPT}/g" input.nml
 sed -i -e "s/ISEED_shum/${ISEED_SHUM}/g" input.nml
 sed -i -e "s/ISEED_skeb/${ISEED_SKEB}/g" input.nml
+sed -i -e "s/ISEED_CA/${ISEED_CA}/g" input.nml
 sed -i -e "s/IAU_FHRS/${iaufhrs}/g" input.nml
 sed -i -e "s/IAU_DELTHRS/${iaudelthrs}/g" input.nml
 sed -i -e "s/IAU_INC_FILES/${iau_inc_files}/g" input.nml
