@@ -9,7 +9,7 @@ export LEVS=127
 export OCNRES="mx100"
 export ORES3=`echo $OCNRES | cut -c3-5`
 
-export exptname="C${RES}L${LEVS}ufs_psonlyiau_gfsv16_hrly"
+export exptname="C${RES}L${LEVS}ufs_psonlyiau_gfsv16_12hrly"
 
 export fg_gfs="run_ens_fv3.sh"
 export rungfs="run_fv3.sh"
@@ -217,12 +217,22 @@ else
 fi
 
 export nanals=80
-export ANALINC=1
+export ANALINC=12
 export RUN='gdas'
-# allowed cycling intervals are 6,2 and 1 hours.
+# allowed cycling intervals are 12,6,2 and 1 hours.
 # 3 doesn't work well because history files would be needed at 
 # non-integer forecast hours and doesn't fit nicely in 6-h dump window.
-if [ $ANALINC -eq 6 ]; then
+export iau_filter_increments=.false.
+if [ $ANALINC -eq 12 ]; then
+   export FHMIN=6
+   export FHMAX=18
+   export FHOUT=3
+   export iaufhrs=6,9,12,15,18
+   export iau_filter_increments=.true.
+   #export FHOUT=1
+   #export iaufhrs=3,4,5,6,7,8,9
+   export iau_delthrs="12" # iau_delthrs < 0 turns IAU off
+elif [ $ANALINC -eq 6 ]; then
    export FHMIN=3
    export FHMAX=9
    export FHOUT=3

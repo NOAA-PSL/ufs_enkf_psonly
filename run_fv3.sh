@@ -165,12 +165,13 @@ if [ "$cold_start" == "false" ] && [ -z $skip_calc_increment ]; then
 # IAU - multiple increments.
    for fh in $iaufhrs2; do
       export increment_file="fv3_increment${fh}.nc"
+      charfhr="fhr"`printf %02i $fh`
       if [ $charnanal == "control" ] && [ "$replay_controlfcst" == 'true' ]; then
-         export analfile="${datapath2}/sanl_${analdate}_fhr0${fh}_ensmean"
-         export fgfile="${datapath2}/sfg_${analdate}_fhr0${fh}_${charnanal}.chgres"
+         export analfile="${datapath2}/sanl_${analdate}_${charfhr}_ensmean"
+         export fgfile="${datapath2}/sfg_${analdate}_${charfhr}_${charnanal}.chgres"
       else
-         export analfile="${datapath2}/sanl_${analdate}_fhr0${fh}_${charnanal}"
-         export fgfile="${datapath2}/sfg_${analdate}_fhr0${fh}_${charnanal}"
+         export analfile="${datapath2}/sanl_${analdate}_${charfhr}_${charnanal}"
+         export fgfile="${datapath2}/sfg_${analdate}_${charfhr}_${charnanal}"
       fi
    cat > calc_increment_ncio.nml << EOF
 &setup
@@ -212,7 +213,8 @@ else
 # move already computed increment files
       for fh in $iaufhrs2; do
          export increment_file="fv3_increment${fh}.nc"
-         /bin/mv -f ${datapath2}/incr_${analdate}_fhr0${fh}_${charnanal} ${increment_file}
+         charfhr="fhr"`printf %02i $fh`
+         /bin/mv -f ${datapath2}/incr_${analdate}_${charfhr}_${charnanal} ${increment_file}
       done
       cd ..
    fi
@@ -261,6 +263,8 @@ else
          iau_inc_files="'fv3_increment3.nc','fv3_increment4.nc','fv3_increment5.nc','fv3_increment6.nc','fv3_increment7.nc','fv3_increment8.nc','fv3_increment9.nc'"
       elif [ "$iaufhrs" == "3,6,9" ]; then
          iau_inc_files="'fv3_increment3.nc','fv3_increment6.nc','fv3_increment9.nc'"
+      elif [ "$iaufhrs" == "6,9,12,15,18" ]; then
+         iau_inc_files="'fv3_increment6.nc','fv3_increment9.nc','fv3_increment12.nc','fv3_increment15.nc','fv3_increment18.nc'"
       elif [ "$iaufhrs" == "1,2,3" ]; then
          iau_inc_files="'fv3_increment1.nc','fv3_increment2.nc','fv3_increment3.nc'"
       elif [ "$iaufhrs" == "6" ]; then
@@ -404,13 +408,13 @@ export timestep_hrs=`python -c "from __future__ import print_function; print($dt
 if [ "${iau_delthrs}" != "-1" ]  && [ "${cold_start}" == "false" ]; then
    FHROT=$FHOFFSET
 else
-   if [ $ANALINC -eq 6 ] && [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ]; then
+   if [ $ANALINC -ge 6 ] && [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ]; then
      FHROT=$FHOFFSET
    else
      FHROT=0
    fi
 fi
-if [ $ANALINC -eq 6 ] && [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ] && [ "${iau_delthrs}" != "-1" ]; then
+if [ $ANALINC -ge 6 ] && [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ] && [ "${iau_delthrs}" != "-1" ]; then
    # cold start ICS at end of window, need one timestep restart
    restart_interval=`python -c "from __future__ import print_function; print($FHROT + $timestep_hrs)"`
    output_1st_tstep_rst=".true."
@@ -503,6 +507,7 @@ sed -i -e "s/ISEED_shum/${ISEED_SHUM}/g" input.nml
 sed -i -e "s/ISEED_skeb/${ISEED_SKEB}/g" input.nml
 sed -i -e "s/IAU_FHRS/${iaufhrs}/g" input.nml
 sed -i -e "s/IAU_DELTHRS/${iaudelthrs}/g" input.nml
+sed -i -e "s/IAU_FILTER_INCREMENTS/${iau_filter_increments}/g" input.nml
 sed -i -e "s/IAU_INC_FILES/${iau_inc_files}/g" input.nml
 sed -i -e "s/WARM_START/${warm_start}/g" input.nml
 sed -i -e "s/EXTERNAL_IC/${externalic}/g" input.nml
@@ -536,7 +541,7 @@ export DATOUT=${DATOUT:-$datapathp1}
 
 # this is a hack to work around the fact that first time step history
 # file is not written if restart file requested at first time step.
-if [ $ANALINC -eq 6 ] && [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ]; then
+if [ $ANALINC -ge 6 ] && [ $cold_start == "true" ] && [ $analdate -gt 2021032400 ]; then
    fh=$FHOFFSET
    fh2=$[$fh+$FHOUT]
    charfhr2="f"`printf %03i $fh2`
