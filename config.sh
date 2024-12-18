@@ -226,11 +226,11 @@ export iau_filter_increments=.false.
 if [ $ANALINC -eq 12 ]; then
    export FHMIN=6
    export FHMAX=18
+   #export FHOUT=2
+   #export iaufhrs=6,8,10,12,14,16,18
    export FHOUT=3
    export iaufhrs=6,9,12,15,18
    export iau_filter_increments=.true.
-   #export FHOUT=1
-   #export iaufhrs=3,4,5,6,7,8,9
    export iau_delthrs="12" # iau_delthrs < 0 turns IAU off
 elif [ $ANALINC -eq 6 ]; then
    export FHMIN=3
