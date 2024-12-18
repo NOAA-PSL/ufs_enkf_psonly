@@ -265,6 +265,8 @@ else
          iau_inc_files="'fv3_increment3.nc','fv3_increment6.nc','fv3_increment9.nc'"
       elif [ "$iaufhrs" == "6,9,12,15,18" ]; then
          iau_inc_files="'fv3_increment6.nc','fv3_increment9.nc','fv3_increment12.nc','fv3_increment15.nc','fv3_increment18.nc'"
+      elif [ "$iaufhrs" == "6,8,10,12.14,16,18" ]; then
+         iau_inc_files="'fv3_increment6.nc','fv3_increment8.nc','fv3_increment10.nc','fv3_increment12.nc','fv3_increment14.nc','fv3_increment16.nc','fv3_increment18.nc'"
       elif [ "$iaufhrs" == "1,2,3" ]; then
          iau_inc_files="'fv3_increment1.nc','fv3_increment2.nc','fv3_increment3.nc'"
       elif [ "$iaufhrs" == "6" ]; then
@@ -557,7 +559,8 @@ fi
 # rename netcdf history files.
 ls -l dyn*.nc
 ls -l phy*.nc
-fh=$FHMIN
+#fh=$FHMIN
+fh=0
 while [ $fh -le $FHMAX ]; do
   charfhr="fhr"`printf %02i $fh`
   charfhr2="f"`printf %03i $fh`
