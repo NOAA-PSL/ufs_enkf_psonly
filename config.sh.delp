@@ -257,20 +257,20 @@ if [[ $write_ensmean == ".true." ]]; then
    export ENKFVARS="write_ensmean=${write_ensmean},"
 fi
 export letkf_flag=.true.
-export letkf_bruteforce_search=.false.
+export letkf_bruteforce_search=.false. # if T, ignores distance
 export denkf=.true.
 export getkf=.true.
-export getkf_inflation=.true.
+export getkf_inflation=.false.
 export modelspace_vloc=.true.
 export letkf_novlocal=.true.
 #export modelspace_vloc=.false.
 #export letkf_novlocal=.false.
 export ANAVINFO_ENKF=${scriptsdir}/global_anavinfo.l${LEVS}.txt.dpres
 
-export nobsl_max=1360
-export corrlengthnh=1250
-export corrlengthtr=1250
-export corrlengthsh=1250
+export nobsl_max=1000
+export corrlengthnh=3000
+export corrlengthtr=3000
+export corrlengthsh=3000
 # The lnsigcutoff* parameters are ignored if modelspace_vloc=T
 export lnsigcutoffnh=1.5
 export lnsigcutofftr=1.5
