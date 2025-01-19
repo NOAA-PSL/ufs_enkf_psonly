@@ -6,6 +6,7 @@ export OMP_NUM_THREADS=$enkf_threads
 export OMP_STACKSIZE=512M
 export MKL_NUM_THREADS=1
 source $MODULESHOME/init/sh
+export vlocal_levs=${vlocal_levs:-"20"}
 module list
 
 iaufhrs2=`echo $iaufhrs | sed 's/,/ /g'`
@@ -71,7 +72,7 @@ EOF
 
 cat enkf.nml
 
-cp ${scriptsdir}/vlocal_eig_L${LEVS}.dat ${datapath2}/vlocal_eig.dat
+/bin/cp -f ${scriptsdir}/vlocal_eig_${vlocal_levs}_L${LEVS}.dat ${datapath2}/vlocal_eig.dat
 
 /bin/rm -f ${datapath2}/enkf.log
 /bin/mv -f ${current_logdir}/ensda.out ${current_logdir}/ensda.out.save
