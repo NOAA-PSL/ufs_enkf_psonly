@@ -107,7 +107,7 @@ if [ $modelspace_vloc ==  ".true." ]; then # run on ens mean, save jacobian
    cat > psop.nml << EOF
 &nam_psop
   nlevt=${nlevt},fhmin=$FHMIN,fhmax=$FHMAX,fhout=${FHOUT},
-  datestring="${analdate}",obsfile="${obs_datapath}/psobs_${analdate}.txt",zthresh=1000,ps_ind=128,
+  datestring="${analdate}",obsfile="${obs_datapath}/psobs_${analdate}.txt",zthresh=1000,ps_ind=255,
 /
 EOF
    cat psop.nml

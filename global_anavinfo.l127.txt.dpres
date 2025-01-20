@@ -52,7 +52,6 @@ state_vector::
 !u       127      0     met_guess    u
 !v       127      0     met_guess    v
 tv      127      0     met_guess    tv
-!tsen    127      0     met_guess    tv,q
 !q       127      1     met_guess    q
 !oz      127      1     met_guess    oz
 !ql      127      1     met_guess    ql 
@@ -81,6 +80,7 @@ control_vector_enkf::
  v       127      0       1.00        -1.0     state    u,v
 !ps        1      0       1.20        -1.0     state    prse
 !pst       1      0       1.20        -1.0     state    prse,u,v
+!tsen    127      0       1.50        -1.0     state    tv
  tv      127      0       1.50        -1.0     state    tv
  q       127      1       1.50        -1.0     state    q
  dprs    127      0       1.00        -1.0     state    prse
