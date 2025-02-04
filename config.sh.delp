@@ -257,23 +257,25 @@ if [[ $write_ensmean == ".true." ]]; then
    export ENKFVARS="write_ensmean=${write_ensmean},"
 fi
 export letkf_flag=.true.
+export regularized_obloc=.false.
 export letkf_bruteforce_search=.false. # if T, ignores distance
-export denkf=.true.
+export denkf=.false.
 export getkf=.true.
-export getkf_inflation=.false.
+export getkf_inflation=.true.
 export modelspace_vloc=.true.
 export letkf_novlocal=.true.
 #export modelspace_vloc=.false.
 #export letkf_novlocal=.false.
 export ANAVINFO_ENKF=${scriptsdir}/global_anavinfo.l${LEVS}.txt.dpres
 
-#export nobsl_max=1000
-export vlocal_levs=20 # for model space localization, number of vertical levels
+export vlocal_levs=30 # for model space localization, number of vertical levels
 export neigv=`head -1 ${scriptsdir}/vlocal_eig_${vlocal_levs}_L${LEVS}.dat | cut -f1 -d" "`
 export nobsl_max=`expr $nanals \* $neigv`
-export corrlengthnh=-2000
-export corrlengthtr=-2000
-export corrlengthsh=-2000
+#export nobsl_max=2000
+#export nobsl_max=-1
+export corrlengthnh=3000
+export corrlengthtr=3000
+export corrlengthsh=3000
 # The lnsigcutoff* parameters are ignored if modelspace_vloc=T
 export lnsigcutoffnh=1.5
 export lnsigcutofftr=1.5
