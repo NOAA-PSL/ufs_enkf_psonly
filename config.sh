@@ -9,7 +9,7 @@ export LEVS=127
 export OCNRES="mx100"
 export ORES3=`echo $OCNRES | cut -c3-5`
 
-export exptname="C${RES}L${LEVS}ufs_psonlyiau_gfsv16"
+export exptname="C${RES}L${LEVS}ufs_psonlyiau_gfsv16_delp"
 
 export fg_gfs="run_ens_fv3.sh"
 export rungfs="run_fv3.sh"
@@ -257,18 +257,27 @@ if [[ $write_ensmean == ".true." ]]; then
    export ENKFVARS="write_ensmean=${write_ensmean},"
 fi
 export letkf_flag=.true.
-export letkf_bruteforce_search=.false.
-export denkf=.false.
+export regularized_obloc=.false.
+export letkf_bruteforce_search=.false. 
+export denkf=.true..
 export getkf=.true.
 export getkf_inflation=.false.
 export modelspace_vloc=.true.
 export letkf_novlocal=.true.
+#export modelspace_vloc=.false.
+#export letkf_novlocal=.false.
 export ANAVINFO_ENKF=${scriptsdir}/global_anavinfo.l${LEVS}.txt.dpres
 
-export nobsl_max=4000
-export corrlengthnh=2000
-export corrlengthtr=2000
-export corrlengthsh=2000
+export letkf_flag=.false.
+
+export vlocal_levs=30 # for model space localization, number of vertical levels
+export neigv=`head -1 ${scriptsdir}/vlocal_eig_${vlocal_levs}_L${LEVS}.dat | cut -f1 -d" "`
+export nobsl_max=`expr $nanals \* $neigv`
+export nobsl_max=1000
+#export nobsl_max=-1
+export corrlengthnh=3000
+export corrlengthtr=3000
+export corrlengthsh=3000
 # The lnsigcutoff* parameters are ignored if modelspace_vloc=T
 export lnsigcutoffnh=1.5
 export lnsigcutofftr=1.5
@@ -279,34 +288,35 @@ export lnsigcutoffpssh=1.5
 export lnsigcutoffsatnh=1.5 
 export lnsigcutoffsattr=1.5  
 export lnsigcutoffsatsh=1.5  
-export paoverpb_thresh=0.998  # ignored for LETKF, set to 1 to use all obs in serial EnKF
+export iassim_order=2
+export paoverpb_thresh=0.98  # ignored for LETKF, set to 1 to use all obs in serial EnKF
 export saterrfact=1.0
 export deterministic=.true.
-export sortinc=.true.
+export sortinc=.false.
 
 export taperanalperts=".true."
 
 # serial filter parameters
 # (from https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.3598)
-export letkf_flag=.false.
-export modelspace_vloc=.false.
-# min localization reduction factor for adaptive localization
-# based on HPaHt/HPbHT. Default (1.0) means no adaptive localization.
-# 0.25 means minimum localization is 0.25*corrlength(nh,tr,sh).
+#export letkf_flag=.false.
+#export modelspace_vloc=.false.
+## min localization reduction factor for adaptive localization
+## based on HPaHt/HPbHT. Default (1.0) means no adaptive localization.
+## 0.25 means minimum localization is 0.25*corrlength(nh,tr,sh).
 export covl_minfact=0.25
-# efolding distance for adapative localization.
-# Localization reduction factor is 1. - exp( -((1.-paoverpb)/covl_efold) )
-# When 1-pavoerpb=1-HPaHt/HPbHt=cov_efold localization scales reduced by
-# factor of 1-1/e ~ 0.632. When paoverpb==>1, localization scales go to zero.
-# When paoverpb==>1, localization scales not reduced.
+## efolding distance for adapative localization.
+## Localization reduction factor is 1. - exp( -((1.-paoverpb)/covl_efold) )
+## When 1-pavoerpb=1-HPaHt/HPbHt=cov_efold localization scales reduced by
+## factor of 1-1/e ~ 0.632. When paoverpb==>1, localization scales go to zero.
+## When paoverpb==>1, localization scales not reduced.
 export covl_efold=0.2
 export corrlengthnh=4000
 export corrlengthtr=4000
 export corrlengthsh=4000
-export lnsigcutoffpsnh=4
-export lnsigcutoffpstr=4
-export lnsigcutoffpssh=4
-export ANAVINFO_ENKF=${scriptsdir}/global_anavinfo.l${LEVS}.txt.ps
+#export lnsigcutoffpsnh=4
+#export lnsigcutoffpstr=4
+#export lnsigcutoffpssh=4
+#export ANAVINFO_ENKF=${scriptsdir}/global_anavinfo.l${LEVS}.txt.ps
 
 export sprd_tol=4.0
 
