@@ -52,7 +52,7 @@ cat <<EOF > enkf.nml
   lnsigcutoffpsnh=$lnsigcutoffpsnh,lnsigcutoffpssh=$lnsigcutoffpssh,lnsigcutoffpstr=$lnsigcutoffpstr,
   nlons=$LONB,nlats=$LATB,smoothparm=$SMOOTHINF,letkf_bruteforce_search=${letkf_bruteforce_search},
   readin_localization=.false.,saterrfact=$saterrfact,sprd_tol=$sprd_tol,
-  covl_minfact=$covl_minfact,covl_efold=$covl_efold,paoverpb_thresh=$paoverpb_thresh,letkf_flag=$letkf_flag,denkf=$denkf,
+  iassim_order=$iassim_order,covl_minfact=$covl_minfact,covl_efold=$covl_efold,paoverpb_thresh=$paoverpb_thresh,letkf_flag=$letkf_flag,denkf=$denkf,
   getkf_inflation=$getkf_inflation,letkf_novlocal=$letkf_novlocal,modelspace_vloc=$modelspace_vloc,save_inflation=.false.,
   reducedgrid=${reducedgrid},nlevs=$LEVS,nanals=$nanals,deterministic=$deterministic,imp_physics=$imp_physics,
   lobsdiag_forenkf=${lobsdiag_forenkf},write_spread_diag=.false.,netcdf_diag=.true.,regularized_obloc=$regularized_obloc,
