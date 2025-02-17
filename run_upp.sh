@@ -1,28 +1,31 @@
 #!/bin/sh
 ##SBATCH -q urgent
 #SBATCH -t 00:30:00
-#SBATCH -A gsd-fv3-dev
+#SBATCH -A gsienkf
 #SBATCH -N 1  
-#SBATCH --ntasks-per-node=80
-#SBATCH -p hercules
+#SBATCH --ntasks-per-node=40
+##SBATCH --ntasks-per-node=80
+##SBATCH -p hercules
 #SBATCH -J run_upp
 #SBATCH -e run_upp.out
 #SBATCH -o run_upp.out
 
-export machine='hercules'
+#export machine='hercules'
+#export basedir=/work2/noaa/gsienkf/${USER}
+export machine='hera'
+export basedir=/scratch2/BMC/gsienkf/${USER}
 
-module use /work/noaa/gsienkf/whitaker/UPP/modulefiles
+module use ${basedir}/UPP/modulefiles
 module load ${machine}
 module load wgrib2
 module list
 
-export exptname=C96L127ufs_psonlyiau_gfsv16
-export basedir=/work2/noaa/gsienkf/${USER}
+export exptname=ufs_enkf_psonly
 export scriptsdir="${basedir}/scripts/${exptname}"
 export execdir=${scriptsdir}/exec_${machine}
 
-analdate='2021090818'
-while [ $analdate -le '2021091500' ]; do
+analdate='2021091206'
+while [ $analdate -le '2021091300' ]; do
 datapath=${basedir}/${exptname}
 YYYYMMDD=`echo $analdate | cut -c1-8`
 YYYY=`echo $analdate | cut -c1-4`
@@ -34,6 +37,7 @@ pushd ${datapath}/postprd$$
 filename_atm=${datapath}/${analdate}/sanl_${analdate}_fhr06_ensmean
 filename_sfc=${datapath}/${analdate}/bfg_${analdate}_fhr06_ensmean
 /bin/cp -f ${scriptsdir}/upp_parm/* .
+#/bin/cp -f ${basedir}/UPP/parm/gfs/postxconfig-NT-gfs-f00.txt postxconfig-NT.txt
 sed -i -e "s/YYYY/${YYYY}/g" itag
 sed -i -e "s/MM/${MM}/g" itag
 sed -i -e "s/DD/${DD}/g" itag
