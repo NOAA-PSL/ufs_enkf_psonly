@@ -9,7 +9,7 @@ export LEVS=127
 export OCNRES="mx100"
 export ORES3=`echo $OCNRES | cut -c3-5`
 
-export exptname="C${RES}L${LEVS}ufs_psonlyiau_gfsv16_delp"
+export exptname="ufs_enkf_psonly"
 
 export fg_gfs="run_ens_fv3.sh"
 export rungfs="run_fv3.sh"
@@ -40,20 +40,24 @@ if [ "$machine" == 'hera' ]; then
    export datapath="${datadir}/${exptname}"
    export logdir="${datadir}/logs/${exptname}"
    export hsidir="/ESRL/BMC/gsienkf/2year/whitaker/${exptname}"
-   export obs_datapath=/scratch1/NCEPDEV/global/glopara/dump
+   export obs_datapath=/scratch2/BMC/gsienkf/whitaker/psobs
    export sstice_datapath=/scratch2/NCEPDEV/stmp1/Jeffrey.S.Whitaker/era5sstice
-   module purge
-   module load intel/18.0.5.274
-   module load impi/2018.0.4 
-   #module use -a /scratch1/NCEPDEV/nems/emc.nemspara/soft/modulefiles
-   #module load netcdf_parallel/4.7.4
-   #module load hdf5_parallel/1.10.6.release
-   module use -a /scratch1/NCEPDEV/global/gwv/lp/lib/modulefiles
-   module load netcdfp/4.7.4
-   #module load esmflocal/8.0.1.08bs
-   module use -a /scratch1/NCEPDEV/nems/emc.nemspara/soft/modulefiles
-   module load hdf5_parallel/1.10.6
-   #module load netcdf_parallel/4.7.4
+   module use /scratch1/NCEPDEV/nems/role.epic/spack-stack/spack-stack-1.6.0/envs/gsi-addon-dev-rocky8/install/modulefiles/Core
+   module load stack-intel/2021.5.0
+   module load crtm-fix/2.4.0.1_emc
+   module load stack-intel-oneapi-mpi/2021.5.1
+   module load grib-util
+   module load parallelio
+   module load netcdf-c/4.9.2
+   module load netcdf-fortran/4.6.1
+   module load bufr/11.7.0 ## worked jan 5
+   module load crtm/2.4.0
+   module load gsi-ncdiag
+   module load python
+   module load py-netcdf4
+   module list
+   export HDF5_DISABLE_VERSION_CHECK=1
+   export WGRIB=`which wgrib`
 elif [ "$machine" == 'orion' ]; then
    source $MODULESHOME/init/sh
    export basedir=/work2/noaa/gsienkf/${USER}
@@ -234,7 +238,7 @@ export iau_delthrs="6" # iau_delthrs < 0 turns IAU off
 #export iaufhrs="6"
 #export iau_delthrs=-1
 
-export nitermax=2 # number of retries
+export nitermax=1 # number of retries
 export scriptsdir="${basedir}/scripts/${exptname}"
 export homedir=$scriptsdir
 export incdate="${scriptsdir}/incdate.sh"
@@ -259,7 +263,7 @@ fi
 export letkf_flag=.true.
 export regularized_obloc=.false.
 export letkf_bruteforce_search=.false. 
-export denkf=.true..
+export denkf=.false..
 export getkf=.true.
 export getkf_inflation=.false.
 export modelspace_vloc=.true.
@@ -268,16 +272,17 @@ export letkf_novlocal=.true.
 #export letkf_novlocal=.false.
 export ANAVINFO_ENKF=${scriptsdir}/global_anavinfo.l${LEVS}.txt.dpres
 
-export letkf_flag=.false.
+#export letkf_flag=.false.
 
 export vlocal_levs=30 # for model space localization, number of vertical levels
 export neigv=`head -1 ${scriptsdir}/vlocal_eig_${vlocal_levs}_L${LEVS}.dat | cut -f1 -d" "`
 export nobsl_max=`expr $nanals \* $neigv`
-export nobsl_max=1000
+#export nobsl_max=1000
 #export nobsl_max=-1
-export corrlengthnh=3000
-export corrlengthtr=3000
-export corrlengthsh=3000
+export nobsl_max=-1
+export corrlengthnh=4000
+export corrlengthtr=4000
+export corrlengthsh=4000
 # The lnsigcutoff* parameters are ignored if modelspace_vloc=T
 export lnsigcutoffnh=1.5
 export lnsigcutofftr=1.5
@@ -289,7 +294,7 @@ export lnsigcutoffsatnh=1.5
 export lnsigcutoffsattr=1.5  
 export lnsigcutoffsatsh=1.5  
 export iassim_order=2
-export paoverpb_thresh=0.98  # ignored for LETKF, set to 1 to use all obs in serial EnKF
+export paoverpb_thresh=0.96  # ignored for LETKF, set to 1 to use all obs in serial EnKF
 export saterrfact=1.0
 export deterministic=.true.
 export sortinc=.false.
@@ -303,16 +308,17 @@ export taperanalperts=".true."
 ## min localization reduction factor for adaptive localization
 ## based on HPaHt/HPbHT. Default (1.0) means no adaptive localization.
 ## 0.25 means minimum localization is 0.25*corrlength(nh,tr,sh).
-export covl_minfact=0.25
+export covl_minfact=0.2
+#export covl_minfact=1.0
 ## efolding distance for adapative localization.
 ## Localization reduction factor is 1. - exp( -((1.-paoverpb)/covl_efold) )
 ## When 1-pavoerpb=1-HPaHt/HPbHt=cov_efold localization scales reduced by
 ## factor of 1-1/e ~ 0.632. When paoverpb==>1, localization scales go to zero.
 ## When paoverpb==>1, localization scales not reduced.
-export covl_efold=0.2
-export corrlengthnh=4000
-export corrlengthtr=4000
-export corrlengthsh=4000
+export covl_efold=0.15
+#export corrlengthnh=4000
+#export corrlengthtr=4000
+#export corrlengthsh=4000
 #export lnsigcutoffpsnh=4
 #export lnsigcutoffpstr=4
 #export lnsigcutoffpssh=4
@@ -324,13 +330,15 @@ export sprd_tol=4.0
 export nlevt=29 # for 127 level model
 
 if [ "$machine" == 'hera' ]; then
-   export python=/contrib/anaconda/2.3.0/bin/python
-   export fv3gfspath=/scratch1/NCEPDEV/global/glopara
-   export FIXFV3=${fv3gfspath}/fix_nco_gfsv16/fix_fv3_gmted2010
-   export FIXGLOBAL=${fv3gfspath}/fix_nco_gfsv16/fix_am
-   export gsipath=${basedir}/gsi/GSI-github-jswhit-master
+   export python=`which python`
+   export fv3gfspath=/scratch1/NCEPDEV/global/glopara/fix_nco_gfsv16.3.0
+   export FIXDIR=/scratch2/NAGAPE/epic/UFS-WM_RT/NEMSfv3gfs/input-data-20221101
+   export FIXDIR_gcyc=${fv3gfspath}
+   export FIXFV3=${fv3gfspath}/fix_fv3_gmted2010
+   export FIXGLOBAL=${fv3gfspath}/fix_am
+   export gsipath=${basedir}/gsi/GSI
    export fixgsi=${gsipath}/fix
-   export fixcrtm=/scratch2/NCEPDEV/nwprod/NCEPLIBS/fix/crtm_v2.3.0
+   export fixcrtm=$CRTM_FIX
    export execdir=${scriptsdir}/exec_${machine}
    export gsiexec=${execdir}/gsi.x
 elif [ "$machine" == 'orion' ] || [ $machine == "hercules" ]; then
