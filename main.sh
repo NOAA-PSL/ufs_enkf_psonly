@@ -158,6 +158,7 @@ fi
 fi # skip to here if fg_only = true
 
 echo "$analdate run enkf ens first guess `date`"
+sh ${scriptsdir}/remove_checksum.sh $datapath2 $nanals
 sh ${scriptsdir}/run_fg_ens.sh > ${current_logdir}/run_fg_ens.out  2>&1
 ens_done=`cat ${current_logdir}/run_fg_ens.log`
 if [ $ens_done == 'yes' ]; then
