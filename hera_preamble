@@ -14,7 +14,7 @@ export machine='hera'
 
 export fg_proc=$corespernode 
 export fg_threads=1
-export enkf_threads=1 
+export enkf_threads=2 
 export write_groups=4
 # 40 cores per node 
 export write_tasks=1 
