@@ -7,6 +7,6 @@ MODELNAME='GFS'
 fileNameFlux='SFCFILENAME'
 fileNameFlat='postxconfig-NT.txt'
 /
-&nampgb
-numx=1,kpo=13,PO=50.,100.,150.,200.,250.,300.,400.,500.,600.,700.,850.,925.,1000.
-/
+&NAMPGB
+kpo=13,PO=50.,100.,150.,200.,250.,300.,400.,500.,600.,700.,850.,925.,1000.
+ /
